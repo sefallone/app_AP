@@ -25,7 +25,7 @@ def local_css():
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap');
     
     .main {
-        background-color: #f8f5f0;
+        background-color: #383125;
     }
     
     .stApp {
