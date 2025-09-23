@@ -22,7 +22,7 @@ st.set_page_config(
 SMTP_CONFIG = {
     'server': 'smtp.gmail.com',  # Puede ser smtp.gmail.com, smtp.office365.com, etc.
     'port': 587,
-    'username': 'tu_email@arteparis.com',  # Cambia por tu email
+    'username': 'arteparisweb@gmail.com',  # Cambia por tu email
     'password': 'tu_contraseña_de_aplicacion',  # Cambia por tu contraseña
     'from_name': 'Arte París Deli Café'
 }
@@ -38,7 +38,7 @@ def local_css():
     }
     
     .stApp {
-        background: linear-gradient(to bottom, #f8f5f0 0%, #e8e1d4 100%);
+        background: linear-gradient(to bottom, #10E8C8 0%, #10E8C8 100%);
     }
     
     h1, h2, h3, h4, h5, h6 {
@@ -53,14 +53,14 @@ def local_css():
     .arte-paris-header {
         text-align: center;
         padding: 1rem;
-        background-color: #4a2c2a;
+        background-color: #09AB92;
         color: white;
         border-radius: 10px;
         margin-bottom: 2rem;
     }
     
     .welcome-box {
-        background-color: white;
+        background-color: black;
         padding: 2rem;
         border-radius: 15px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -68,7 +68,7 @@ def local_css():
     }
     
     .product-card {
-        background-color: white;
+        background-color: 09AB92;
         border-radius: 10px;
         padding: 1rem;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -81,7 +81,7 @@ def local_css():
     }
     
     .promo-banner {
-        background: linear-gradient(to right, #4a2c2a, #7b5a57);
+        background: linear-gradient(to right, #09AB92, #09AB92);
         color: white;
         padding: 1.5rem;
         border-radius: 10px;
@@ -89,7 +89,7 @@ def local_css():
     }
     
     .points-display {
-        background: linear-gradient(to right, #d4af37, #f5d76e);
+        background: linear-gradient(to right, #09AB92, #09AB92);
         color: #4a2c2a;
         padding: 1rem;
         border-radius: 10px;
@@ -98,7 +98,7 @@ def local_css():
     }
     
     .stButton>button {
-        background-color: #4a2c2a;
+        background-color: #09AB92;
         color: white;
         border: none;
         padding: 0.5rem 2rem;
@@ -107,12 +107,12 @@ def local_css():
     }
     
     .stButton>button:hover {
-        background-color: #7b5a57;
+        background-color: #09AB92;
         color: white;
     }
     
     .verification-success {
-        background-color: #d4edda;
+        background-color: #09AB92;
         color: #155724;
         padding: 1rem;
         border-radius: 5px;
