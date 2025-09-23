@@ -22,8 +22,8 @@ st.set_page_config(
 SMTP_CONFIG = {
     'server': 'smtp.gmail.com',  # Puede ser smtp.gmail.com, smtp.office365.com, etc.
     'port': 587,
-    'username': 'arteparisweb@gmail.com',  # Cambia por tu email
-    'password': 'tu_contraseña_de_aplicacion',  # Cambia por tu contraseña
+    'username': 'arteparisdelicafe@gmail.com',  # Cambia por tu email
+    'password': 'AP2006$$$',  # Cambia por tu contraseña
     'from_name': 'Arte París Deli Café'
 }
 
