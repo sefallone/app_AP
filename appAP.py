@@ -18,6 +18,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# Configuración SMTP (MODIFICA ESTOS DATOS CON TU INFORMACIÓN)
+SMTP_CONFIG = {
+    'server': 'smtp.gmail.com',  # Puede ser smtp.gmail.com, smtp.office365.com, etc.
+    'port': 587,
+    'username': 'tu_email@arteparis.com',  # Cambia por tu email
+    'password': 'tu_contraseña_de_aplicacion',  # Cambia por tu contraseña
+    'from_name': 'Arte París Deli Café'
+}
+
 # Estilos CSS personalizados
 def local_css():
     st.markdown("""
@@ -25,7 +34,7 @@ def local_css():
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap');
     
     .main {
-        background-color: #383125;
+        background-color: #f8f5f0;
     }
     
     .stApp {
@@ -102,6 +111,15 @@ def local_css():
         color: white;
     }
     
+    .verification-success {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 5px;
+        border: 1px solid #c3e6cb;
+        margin: 1rem 0;
+    }
+    
     </style>
     """, unsafe_allow_html=True)
 
@@ -153,12 +171,104 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Función para enviar correos (configuración simplificada)
+# Función para enviar correos de verificación
 def send_verification_email(email, verification_code):
-    # En una implementación real, configurarías aquí tu servidor SMTP
-    # Esta es una versión simplificada para demostración
-    st.info(f"En un entorno real, se enviaría un correo a {email} con el código de verificación: {verification_code}")
-    return True
+    try:
+        # Crear el mensaje
+        msg = MIMEMultipart()
+        msg['From'] = f"{SMTP_CONFIG['from_name']} <{SMTP_CONFIG['username']}>"
+        msg['To'] = email
+        msg['Subject'] = "Verifica tu cuenta - Arte París Deli Café"
+        
+        # Cuerpo del mensaje en HTML
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #4a2c2a; color: white; padding: 20px; text-align: center; }}
+                .content {{ background-color: #f8f5f0; padding: 20px; }}
+                .verification-code {{ 
+                    background-color: #d4af37; 
+                    color: #4a2c2a; 
+                    padding: 15px; 
+                    font-size: 24px; 
+                    font-weight: bold; 
+                    text-align: center; 
+                    margin: 20px 0;
+                    border-radius: 5px;
+                }}
+                .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Arte París Deli Café</h1>
+                </div>
+                <div class="content">
+                    <h2>¡Bienvenido a nuestra comunidad!</h2>
+                    <p>Gracias por registrarte en Arte París Deli Café. Para activar tu cuenta y comenzar a disfrutar de todos nuestros beneficios, por favor verifica tu dirección de correo electrónico.</p>
+                    
+                    <p>Tu código de verificación es:</p>
+                    <div class="verification-code">{verification_code}</div>
+                    
+                    <p>Ingresa este código en nuestra página web para completar tu registro.</p>
+                    
+                    <p>Si no solicitaste este registro, por favor ignora este mensaje.</p>
+                </div>
+                <div class="footer">
+                    <p>Arte París Deli Café • Av. Principal #123, Ciudad • Tel: +1 234 567 8900</p>
+                    <p>© 2024 Arte París Deli Café. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Versión alternativa en texto plano
+        text = f"""
+        Arte París Deli Café - Verificación de cuenta
+        
+        ¡Bienvenido a nuestra comunidad!
+        
+        Tu código de verificación es: {verification_code}
+        
+        Ingresa este código en nuestra página web para completar tu registro.
+        
+        Si no solicitaste este registro, por favor ignora este mensaje.
+        
+        --
+        Arte París Deli Café
+        Av. Principal #123, Ciudad
+        Tel: +1 234 567 8900
+        """
+        
+        # Adjuntar ambas versiones
+        msg.attach(MIMEText(text, 'plain'))
+        msg.attach(MIMEText(html, 'html'))
+        
+        # Conectar al servidor SMTP y enviar
+        server = smtplib.SMTP(SMTP_CONFIG['server'], SMTP_CONFIG['port'])
+        server.starttls()  # Habilitar seguridad
+        server.login(SMTP_CONFIG['username'], SMTP_CONFIG['password'])
+        server.send_message(msg)
+        server.quit()
+        
+        st.success(f"✅ Correo de verificación enviado a {email}")
+        return True
+        
+    except smtplib.SMTPAuthenticationError:
+        st.error("❌ Error de autenticación SMTP. Verifica tu usuario y contraseña.")
+        return False
+    except smtplib.SMTPException as e:
+        st.error(f"❌ Error SMTP: {str(e)}")
+        return False
+    except Exception as e:
+        st.error(f"❌ Error inesperado al enviar el correo: {str(e)}")
+        return False
 
 # Función para validar email
 def is_valid_email(email):
@@ -167,6 +277,8 @@ def is_valid_email(email):
 
 # Función para validar teléfono (formato simple)
 def is_valid_phone(phone):
+    if not phone:  # El teléfono es opcional
+        return True
     pattern = r'^\+?[0-9]{8,15}$'
     return re.match(pattern, phone) is not None
 
@@ -201,15 +313,20 @@ def show_registration_page():
             email = st.text_input("Correo electrónico")
             phone = st.text_input("Número de teléfono (opcional)")
             password = st.text_input("Contraseña", type="password")
+            confirm_password = st.text_input("Confirmar contraseña", type="password")
             submit_button = st.form_submit_button("Registrarse")
             
             if submit_button:
                 if not name:
-                    st.error("Por favor ingresa tu nombre")
+                    st.error("❌ Por favor ingresa tu nombre")
                 elif not email or not is_valid_email(email):
-                    st.error("Por favor ingresa un correo electrónico válido")
+                    st.error("❌ Por favor ingresa un correo electrónico válido")
+                elif phone and not is_valid_phone(phone):
+                    st.error("❌ Por favor ingresa un número de teléfono válido")
                 elif not password or len(password) < 6:
-                    st.error("La contraseña debe tener al menos 6 caracteres")
+                    st.error("❌ La contraseña debe tener al menos 6 caracteres")
+                elif password != confirm_password:
+                    st.error("❌ Las contraseñas no coinciden")
                 else:
                     conn = sqlite3.connect('arte_paris.db')
                     c = conn.cursor()
@@ -217,7 +334,7 @@ def show_registration_page():
                     # Verificar si el email ya existe
                     c.execute("SELECT * FROM users WHERE email = ?", (email,))
                     if c.fetchone():
-                        st.error("Este correo electrónico ya está registrado")
+                        st.error("❌ Este correo electrónico ya está registrado")
                     else:
                         # Generar código de verificación
                         verification_code = generate_verification_code()
@@ -237,9 +354,9 @@ def show_registration_page():
                                 st.session_state['page'] = 'verify'
                                 st.rerun()
                             else:
-                                st.error("Error al enviar el correo de verificación. Por favor intenta nuevamente.")
+                                st.error("❌ Error al enviar el correo de verificación. Por favor intenta nuevamente.")
                         except Exception as e:
-                            st.error(f"Error al registrar usuario: {str(e)}")
+                            st.error(f"❌ Error al registrar usuario: {str(e)}")
                     
                     conn.close()
     
@@ -250,6 +367,13 @@ def show_registration_page():
             <p>¡Escanea el código QR de nuestro flyer y sé parte de la familia Arte París!</p>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Enlace para usuarios existentes
+        st.markdown("---")
+        st.markdown("¿Ya tienes una cuenta?")
+        if st.button("Iniciar Sesión"):
+            st.session_state['page'] = 'login'
+            st.rerun()
 
 # Página de verificación
 def show_verification_page():
@@ -258,52 +382,59 @@ def show_verification_page():
     email = st.session_state.get('verification_email', '')
     
     if not email:
-        st.error("No se encontró dirección de correo para verificar")
+        st.error("❌ No se encontró dirección de correo para verificar")
         st.session_state['page'] = 'register'
         st.rerun()
         return
     
-    st.write(f"Hemos enviado un código de verificación a {email}")
-    
-    verification_code = st.text_input("Ingresa el código de verificación", max_chars=6)
-    
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([2, 1])
     
     with col1:
-        if st.button("Verificar"):
-            if verification_code:
+        st.write(f"📧 Hemos enviado un código de verificación a **{email}**")
+        st.write("Revisa tu bandeja de entrada y también la carpeta de spam si no lo encuentras.")
+        
+        verification_code = st.text_input("Ingresa el código de verificación de 6 dígitos", max_chars=6, placeholder="000000")
+        
+        col_btn1, col_btn2 = st.columns(2)
+        
+        with col_btn1:
+            if st.button("✅ Verificar Código", use_container_width=True):
+                if verification_code and len(verification_code) == 6:
+                    conn = sqlite3.connect('arte_paris.db')
+                    c = conn.cursor()
+                    
+                    c.execute("SELECT verification_code FROM users WHERE email = ?", (email,))
+                    result = c.fetchone()
+                    
+                    if result and result[0] == verification_code:
+                        # Código correcto, marcar como verificado
+                        c.execute("UPDATE users SET verified = 1 WHERE email = ?", (email,))
+                        conn.commit()
+                        conn.close()
+                        
+                        st.markdown("<div class='verification-success'>🎉 ¡Cuenta verificada correctamente! Redirigiendo...</div>", unsafe_allow_html=True)
+                        time.sleep(2)
+                        st.session_state['page'] = 'login'
+                        st.rerun()
+                    else:
+                        st.error("❌ Código de verificación incorrecto")
+                else:
+                    st.error("❌ Por favor ingresa un código de 6 dígitos")
+        
+        with col_btn2:
+            if st.button("🔄 Reenviar Código", use_container_width=True):
+                new_code = generate_verification_code()
                 conn = sqlite3.connect('arte_paris.db')
                 c = conn.cursor()
+                c.execute("UPDATE users SET verification_code = ? WHERE email = ?", (new_code, email))
+                conn.commit()
+                conn.close()
                 
-                c.execute("SELECT verification_code FROM users WHERE email = ?", (email,))
-                result = c.fetchone()
-                
-                if result and result[0] == verification_code:
-                    # Código correcto, marcar como verificado
-                    c.execute("UPDATE users SET verified = 1 WHERE email = ?", (email,))
-                    conn.commit()
-                    conn.close()
-                    
-                    st.success("¡Cuenta verificada correctamente! Ahora puedes iniciar sesión.")
-                    time.sleep(2)
-                    st.session_state['page'] = 'login'
-                    st.rerun()
-                else:
-                    st.error("Código de verificación incorrecto")
-            else:
-                st.error("Por favor ingresa el código de verificación")
+                if send_verification_email(email, new_code):
+                    st.success("📨 Nuevo código enviado correctamente")
     
     with col2:
-        if st.button("Reenviar código"):
-            new_code = generate_verification_code()
-            conn = sqlite3.connect('arte_paris.db')
-            c = conn.cursor()
-            c.execute("UPDATE users SET verification_code = ? WHERE email = ?", (new_code, email))
-            conn.commit()
-            conn.close()
-            
-            send_verification_email(email, new_code)
-            st.success("Nuevo código enviado")
+        st.image("https://images.unsplash.com/photo-1563013541-666ab0851fbd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80", use_column_width=True)
 
 # Página de login
 def show_login_page():
@@ -319,7 +450,7 @@ def show_login_page():
             
             if login_button:
                 if not email or not password:
-                    st.error("Por favor ingresa ambos campos")
+                    st.error("❌ Por favor ingresa ambos campos")
                 else:
                     conn = sqlite3.connect('arte_paris.db')
                     c = conn.cursor()
@@ -337,9 +468,9 @@ def show_login_page():
                             st.session_state['page'] = 'dashboard'
                             st.rerun()
                         else:
-                            st.error("Por favor verifica tu correo electrónico antes de iniciar sesión")
+                            st.error("❌ Por favor verifica tu correo electrónico antes de iniciar sesión")
                     else:
-                        st.error("Correo electrónico o contraseña incorrectos")
+                        st.error("❌ Correo electrónico o contraseña incorrectos")
                     
                     conn.close()
     
@@ -347,11 +478,11 @@ def show_login_page():
         st.image("https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80", use_column_width=True)
         st.markdown("""
         <div style='text-align: center; margin-top: 1rem;'>
-            <p>¿No tienes una cuenta? <a href='#' onclick='window.location.reload();'>Regístrate aquí</a></p>
+            <p>¿No tienes una cuenta?</p>
         </div>
         """, unsafe_allow_html=True)
         
-        if st.button("Volver al registro"):
+        if st.button("Registrarse aquí"):
             st.session_state['page'] = 'register'
             st.rerun()
 
@@ -417,9 +548,12 @@ def show_dashboard():
                 <img src='{product['image_url']}' style='width: 100%; height: 200px; object-fit: cover; border-radius: 8px;'>
                 <h4>{product['name']}</h4>
                 <p>{product['description']}</p>
-                <p><strong>${product['price']}</strong></p>
+                <p><strong>${product['price']:.2f}</strong></p>
             </div>
             """, unsafe_allow_html=True)
+            if st.button(f"Agregar al pedido", key=f"add_{product['id']}"):
+                # Aquí podrías agregar lógica para el carrito de compras
+                st.success(f"✅ {product['name']} agregado a tu pedido")
     
     # Sistema de puntos
     st.markdown("## 🏆 Sistema de Puntos")
