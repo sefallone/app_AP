@@ -47,6 +47,18 @@ def get_profile(uid):
     return None
 
 
+def update_points(uid, delta):
+    """Suma o resta puntos en el perfil"""
+    doc_ref = db.collection("clientes").document(uid)
+    doc = doc_ref.get()
+    if doc.exists:
+        current = doc.to_dict().get("puntos", 0)
+        new_value = max(0, current + delta)  # nunca menos de 0
+        doc_ref.update({"puntos": new_value})
+        return new_value
+    return 0
+
+
 # --- UI ---
 st.title("App de Clientes - Arte París")
 
@@ -64,9 +76,25 @@ if st.session_state["user"]:
     perfil = get_profile(uid)
     if perfil:
         st.subheader("Tu perfil")
-        st.write(f"Nombre: {perfil['nombre']}")
-        st.write(f"Correo: {perfil['email']}")
-        st.write(f"Puntos acumulados: {perfil['puntos']}")
+        st.write(f"**Nombre:** {perfil['nombre']}")
+        st.write(f"**Correo:** {perfil['email']}")
+        st.write(f"**Puntos acumulados:** {perfil['puntos']}")
+
+        # --- Sección de puntos ---
+        st.subheader("Gestión de Puntos")
+
+        if st.button("Acumular +10 puntos"):
+            new_points = update_points(uid, 10)
+            st.success(f"Ahora tienes {new_points} puntos 🎉")
+            st.experimental_rerun()
+
+        if st.button("Canjear 50 puntos"):
+            if perfil["puntos"] >= 50:
+                new_points = update_points(uid, -50)
+                st.success(f"Canje exitoso ✅. Te quedan {new_points} puntos.")
+                st.experimental_rerun()
+            else:
+                st.warning("No tienes suficientes puntos para canjear ❌")
 
     if st.button("Cerrar sesión"):
         st.session_state["user"] = None
