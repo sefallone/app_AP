@@ -1,159 +1,103 @@
 import streamlit as st
-from datetime import datetime
-import pyrebase
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, auth, firestore
+import requests
+import json
 
-# --------------------------
-# CONFIG
-# --------------------------
-firebase_config = st.secrets["firebase"]
+# --- Configuración ---
+API_KEY = st.secrets["FIREBASE_API_KEY"]  # Firebase Web API Key
 
-# Inicializar pyrebase (Auth cliente)
-pb = pyrebase.initialize_app(firebase_config)
-pb_auth = pb.auth()
-
-# Inicializar firebase_admin (server-side) usando service account JSON desde secrets
+# Inicializar Firebase Admin
 if not firebase_admin._apps:
-    cred = credentials.Certificate(dict(st.secrets["service_account"]))
+    cred = credentials.Certificate(st.secrets["FIREBASE_SERVICE_ACCOUNT"])
     firebase_admin.initialize_app(cred)
-
 db = firestore.client()
 
-# --------------------------
-# Helpers
-# --------------------------
-def create_user_profile_in_firestore(uid, email, name=""):
-    """Crea el documento del usuario con saldo de puntos inicial."""
-    doc_ref = db.collection("users").document(uid)
-    doc_ref.set({
+
+# --- Funciones auxiliares ---
+def login_user(email, password):
+    """Login con Firebase REST API (correo + contraseña)"""
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={API_KEY}"
+    payload = json.dumps({
         "email": email,
-        "name": name,
-        "points_balance": 0,
-        "tier": "bronze",
-        "created_at": datetime.utcnow(),
-        "last_update": datetime.utcnow(),
+        "password": password,
+        "returnSecureToken": True
+    })
+    res = requests.post(url, data=payload)
+    if res.status_code == 200:
+        return res.json()
+    else:
+        raise Exception(res.json().get("error", {}).get("message", "Login failed"))
+
+
+def save_profile(uid, nombre, email):
+    """Guarda perfil inicial del cliente en Firestore"""
+    db.collection("clientes").document(uid).set({
+        "nombre": nombre,
+        "email": email,
+        "puntos": 0
     })
 
-def get_user_profile(uid):
-    doc = db.collection("users").document(uid).get()
-    return doc.to_dict() if doc.exists else None
 
-def add_points_transaction(uid, delta, reason="manual"):
-    """Ejemplo de transacción segura para sumar/restar puntos."""
-    user_ref = db.collection("users").document(uid)
+def get_profile(uid):
+    """Obtiene el perfil del cliente desde Firestore"""
+    doc = db.collection("clientes").document(uid).get()
+    if doc.exists:
+        return doc.to_dict()
+    return None
 
-    def transaction_update(transaction, ref):
-        snapshot = ref.get(transaction=transaction)
-        if not snapshot.exists:
-            raise RuntimeError("Usuario no existe")
-        current = snapshot.get("points_balance") or 0
-        new_balance = current + delta
-        if new_balance < 0:
-            raise RuntimeError("Saldo insuficiente")
-        transaction.update(ref, {
-            "points_balance": new_balance,
-            "last_update": datetime.utcnow()
-        })
-        # Crear registro de transacción
-        tx_ref = ref.collection("points_tx").document()
-        transaction.set(tx_ref, {
-            "delta": delta,
-            "reason": reason,
-            "created_at": datetime.utcnow()
-        })
 
-    db.run_transaction(lambda tx: transaction_update(tx, user_ref))
+# --- UI ---
+st.title("App de Clientes - Arte París")
 
-# --------------------------
-# UI
-# --------------------------
-st.title("Club de Fidelidad - Firebase + Streamlit")
+# Inicializar sesión
+if "user" not in st.session_state:
+    st.session_state["user"] = None
 
-menu = st.sidebar.selectbox("Menú", ["Registro", "Login", "Perfil (autenticado)"])
+if st.session_state["user"]:
+    # Usuario logueado
+    user_info = st.session_state["user"]
+    uid = user_info["localId"]
 
-if menu == "Registro":
-    st.header("Crear cuenta")
-    name = st.text_input("Nombre")
-    email = st.text_input("Email")
-    password = st.text_input("Contraseña", type="password")
-    if st.button("Registrarme"):
-        try:
-            # Crear usuario
-            user = pb_auth.create_user_with_email_and_password(email, password)
-            id_token = user['idToken']
-            # Enviar email de verificación
-            pb_auth.send_email_verification(id_token)
+    st.success(f"Bienvenido {user_info['email']} 👋")
 
-            # Obtener UID
-            info = pb_auth.get_account_info(id_token)
-            uid = info['users'][0]['localId']
+    perfil = get_profile(uid)
+    if perfil:
+        st.subheader("Tu perfil")
+        st.write(f"Nombre: {perfil['nombre']}")
+        st.write(f"Correo: {perfil['email']}")
+        st.write(f"Puntos acumulados: {perfil['puntos']}")
 
-            # Crear perfil en Firestore
-            create_user_profile_in_firestore(uid, email, name)
+    if st.button("Cerrar sesión"):
+        st.session_state["user"] = None
+        st.experimental_rerun()
 
-            st.success("Cuenta creada. Revisa tu email para verificar la cuenta.")
-        except Exception as e:
-            st.error(f"Error: {e}")
+else:
+    # Menú de no logueado
+    menu = st.sidebar.selectbox("Menú", ["Registro", "Login"])
 
-elif menu == "Login":
-    st.header("Iniciar sesión")
-    email = st.text_input("Email")
-    password = st.text_input("Contraseña", type="password")
-    if st.button("Entrar"):
-        try:
-            user = pb_auth.sign_in_with_email_and_password(email, password)
-            id_token = user['idToken']
-            info = pb_auth.get_account_info(id_token)
-            user_rec = info['users'][0]
-            uid = user_rec['localId']
-            verified = user_rec.get('emailVerified', False)
+    if menu == "Registro":
+        nombre = st.text_input("Nombre")
+        email = st.text_input("Correo")
+        password = st.text_input("Contraseña", type="password")
 
-            if not verified:
-                st.warning("Tu email no está verificado.")
-                if st.button("Reenviar verificación"):
-                    pb_auth.send_email_verification(id_token)
-                    st.info("Email de verificación reenviado.")
-            else:
-                st.success("Login correcto.")
-                st.session_state["uid"] = uid
-                st.session_state["id_token"] = id_token
+        if st.button("Registrar"):
+            try:
+                user = auth.create_user(email=email, password=password)
+                save_profile(user.uid, nombre, email)
+                st.success("Usuario creado correctamente ✅ Ahora puedes iniciar sesión.")
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+    elif menu == "Login":
+        email = st.text_input("Correo")
+        password = st.text_input("Contraseña", type="password")
+
+        if st.button("Ingresar"):
+            try:
+                user_info = login_user(email, password)
+                st.session_state["user"] = user_info
                 st.experimental_rerun()
-        except Exception as e:
-            st.error(f"Error de autenticación: {e}")
-
-elif menu == "Perfil (autenticado)":
-    if "uid" not in st.session_state:
-        st.info("Inicia sesión primero.")
-    else:
-        uid = st.session_state["uid"]
-        profile = get_user_profile(uid)
-        if not profile:
-            st.error("Perfil no encontrado.")
-        else:
-            st.subheader(f"Hola, {profile.get('name') or profile.get('email')}")
-            st.write("Puntos:", profile.get("points_balance", 0))
-            st.write("Tier:", profile.get("tier"))
-
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("Sumar 10 puntos"):
-                    try:
-                        add_points_transaction(uid, 10, reason="promo_demo")
-                        st.success("10 puntos añadidos.")
-                    except Exception as e:
-                        st.error(str(e))
-            with col2:
-                if st.button("Canjear 5 puntos"):
-                    try:
-                        add_points_transaction(uid, -5, reason="redeem_demo")
-                        st.success("5 puntos canjeados.")
-                    except Exception as e:
-                        st.error(str(e))
-
-            st.write("Últimas transacciones:")
-            tx_docs = db.collection("users").document(uid).collection("points_tx") \
-                        .order_by("created_at", direction=firestore.Query.DESCENDING).limit(10).stream()
-            for t in tx_docs:
-                st.write(t.to_dict())
+            except Exception as e:
+                st.error(f"Error: {e}")
 
