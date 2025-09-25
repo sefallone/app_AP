@@ -1,179 +1,256 @@
 import streamlit as st
-import firebase_admin
-from firebase_admin import credentials, auth, firestore
 import requests
 import json
+import time
 
 # ==================================================
-# CONFIGURACIÓN MANUAL DE FIREBASE (ELIMINA ESTO CUANDO FUNCIONEN LOS SECRETS)
+# CONFIGURACIÓN FIREBASE
 # ==================================================
 
-# 🔥 PEGA TU CONFIGURACIÓN AQUÍ DIRECTAMENTE
 FIREBASE_CONFIG = {
     "API_KEY": "AIzaSyAr3RChPqT89oy_dBakL7PO_qU03TTLE0k",
-    "SERVICE_ACCOUNT": {
-        "type": "service_account",
-        "project_id": "webap-6e49a",
-        "private_key_id": "c0e8fd963a84b382decbb8c06785f2786aa58923",
-        "private_key": """-----BEGIN PRIVATE KEY-----
-MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDIL+ComB9bMuYb
-ZeiH/an6aBBLb0ZMJ8npJHEeFmXQ/cobrLzSj9YtsjOsvYHyONPI2kgeeSZCGbSc
-YqHJeW3n6mR+8klB3qGkwFMDWRdCS2ni016EgXkSamq6zEZ7kO2DHonSy1eQfZiD
-sdRhju4DV9icl188+Tr8pujuHde3ysfckIEC9as3CzpCIqoB65UvG5tsFGEXvvLO
-r5lsshn2sR89u8esjy3dfqTChj7MMMAquKhMze34N28AOKTci6K1z/5H1JfD2RxI
-+wNCiQA1sF/0YlSVratQ5kbJ6MiitzxTiN8cjm9kZuSvSXCe8Bm3HsxrSNJwRzj3
-JBnAHYW7AgMBAAECggEAA2Z2Hpb64rMsymatj5saPIPGUb8G8Xs0Mu6+ByCimRf+
-dgA18tj47oIaM5htG8lQUOyNkLWbwJVW29h8Xq4z1N5xLODTqA1D2fG0V0MM90DN
-qx8jpK+ITWzw+XxHxDM0KD0oDSRhYosSQJu60O9lu+PNl5dQnvoCwPuFdanxxJA4
-VDlai49i7Ony1zElqoYKGqAcJK4aC4ga5sfHWsC4F+HiEE01PfQCijnilKu6UEFt
-HvInoys9gj8dNz/BNsIkaQ7MOPlFc1NQISUiuFL0pNLS9O2s0n8DKVULWzR2OYfK
-k1fJjc5olOdFEAB67FVa5zMDPv49mckZUOqPxZOCEQKBgQDpPHkVh2Af2quUmfvt
-viyi9BSoJel9V/X2HVo0cn8FbE1FBEMcCP4r/thc6nt2Q5V+X21UQ0vym0WLcpWe
-MSqXsBsaIYp6O1L7+0INOeUUSGmZlFONVnBoJPwzoLfyWzGULadaPBj94fFWhVCd
-HYEBCE8+URniCgFfGuqCm7ReCwKBgQDbuac+z5Q0yHPJuwMVastV4vlvWvZTt1F0
-OqnhCpZjUmWNI/uhhXVfpSKC5Wy3v9JnFFMNNQoWATvB+FoOVQ6FIY/0QxN5uxiX
-jhe92kKStY2oWARBvunIoX++s/IR9aXAkjEwzLCIx8EIfHwVDYoaNBmyNPp7uEBO
-6e/DfuE1EQKBgFE5PRWxQll1hoFGqsRdkR/ijnsMUObUxhRCnpJbOT8DO1mIpXJS
-82kQ4/pfskU6Pgp3YxSQJxfC2RI6Aj7H8oRG0PllqtrsY/baxmLiwZMxsIzKadpz
-usuZ7bZxBv5AoeBvkbNL8IwhrjEqViuRBcb9RNN33OKqB1Y+gmKfpM2HAoGARE3p
-XNBAvUvXGs4E/mJthWyCqAg57Ppe2uflqWyWJZgWs5KNBcAsJah7Gv/hFRoPeTXL
-P57OXNrTTdA7hpsQYXh2fLNhWYU89tgYL0+rRFomCEAcSqfjmxgBUzIzPTwE4+FO
-Y2IuOscGDfJMzGqiFNU/a7OmblFvxFhazYYi0lECgYEAn4WIRH7uIEBRhajPWWgg
-bD1aWCrsiCJtBz4J89dNDQ1Cr2sqGRfIY9Mp2XdgE70SXo5F7ce8ybT5aZPCRHT9
-xVNCYKc33+06qCOuBsIMMakI2STxRjYXBsE8/ZrXBfl2BFFh6nmdYstAJ/FFo6QN
-tmYP4juK0ul0xRnlkFWGE30=
------END PRIVATE KEY-----""",
-        "client_email": "firebase-adminsdk-fbsvc@webap-6e49a.iam.gserviceaccount.com",
-        "client_id": "100204266031113174768",
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40webap-6e49a.iam.gserviceaccount.com",
-        "universe_domain": "googleapis.com"
-    }
+    "PROJECT_ID": "webap-6e49a"
 }
 
 # ==================================================
-# INICIALIZACIÓN DE FIREBASE
+# FUNCIONES MEJORADAS CON REGLAS TEMPORALES
 # ==================================================
 
-# Usar configuración directa en lugar de secrets
-API_KEY = FIREBASE_CONFIG["API_KEY"]
-
-try:
-    if not firebase_admin._apps:
-        cred = credentials.Certificate(FIREBASE_CONFIG["SERVICE_ACCOUNT"])
-        firebase_admin.initialize_app(cred)
-    
-    db = firestore.client()
-    st.success("✅ Firebase conectado correctamente!")
-    
-except Exception as e:
-    st.error(f"❌ Error conectando con Firebase: {e}")
-    st.stop()
-
-# ==================================================
-# FUNCIONES DE LA APLICACIÓN
-# ==================================================
+def signup_user(email, password, nombre):
+    """Registrar usuario con Firebase REST API"""
+    try:
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_CONFIG['API_KEY']}"
+        payload = json.dumps({
+            "email": email,
+            "password": password,
+            "returnSecureToken": True
+        })
+        headers = {'Content-Type': 'application/json'}
+        
+        response = requests.post(url, data=payload, headers=headers)
+        result = response.json()
+        
+        if response.status_code == 200:
+            st.success("✅ Usuario registrado en Authentication")
+            # Intentar guardar perfil (puede fallar por reglas)
+            time.sleep(1)  # Pequeña pausa
+            save_profile_via_rest(result['localId'], nombre, email)
+            return result
+        else:
+            error_msg = result.get('error', {}).get('message', 'Error desconocido')
+            raise Exception(f"Registro falló: {error_msg}")
+            
+    except Exception as e:
+        raise Exception(f"Error en registro: {str(e)}")
 
 def login_user(email, password):
     """Login con Firebase REST API"""
-    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={API_KEY}"
-    payload = json.dumps({
-        "email": email,
-        "password": password,
-        "returnSecureToken": True
-    })
-    res = requests.post(url, data=payload)
-    if res.status_code == 200:
-        return res.json()
-    else:
-        raise Exception(res.json().get("error", {}).get("message", "Login failed"))
+    try:
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_CONFIG['API_KEY']}"
+        payload = json.dumps({
+            "email": email,
+            "password": password,
+            "returnSecureToken": True
+        })
+        headers = {'Content-Type': 'application/json'}
+        
+        response = requests.post(url, data=payload, headers=headers)
+        result = response.json()
+        
+        if response.status_code == 200:
+            return result
+        else:
+            error_msg = result.get('error', {}).get('message', 'Error desconocido')
+            raise Exception(f"Login falló: {error_msg}")
+            
+    except Exception as e:
+        raise Exception(f"Error en login: {str(e)}")
 
-def save_profile(uid, nombre, email):
-    """Guarda perfil inicial del cliente"""
-    db.collection("clientes").document(uid).set({
-        "nombre": nombre,
-        "email": email,
-        "puntos": 0
-    })
+def save_profile_via_rest(uid, nombre, email):
+    """Guardar perfil - con manejo de errores de reglas"""
+    try:
+        url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
+        
+        document_data = {
+            "fields": {
+                "nombre": {"stringValue": nombre},
+                "email": {"stringValue": email},
+                "puntos": {"integerValue": 0},
+                "timestamp": {"timestampValue": "2024-01-01T00:00:00Z"}
+            }
+        }
+        
+        response = requests.patch(url, json=document_data)
+        
+        if response.status_code == 200:
+            st.success("✅ Perfil guardado en Firestore")
+            return True
+        else:
+            # Si falla por reglas, mostrar ayuda
+            error_msg = response.json().get('error', {}).get('message', '')
+            if "permission" in error_msg.lower():
+                st.warning("""
+                ⚠️ **Problema de permisos en Firestore**
+                
+                **Solución temporal:**
+                1. Ve a Firestore Database → Reglas
+                2. Reemplaza las reglas actuales por:
+                ```
+                rules_version = '2';
+                service cloud.firestore {
+                  match /databases/{database}/documents {
+                    match /{document=**} {
+                      allow read, write: if true;
+                    }
+                  }
+                }
+                ```
+                3. Haz clic en **Publicar**
+                """)
+            return False
+            
+    except Exception as e:
+        st.warning(f"⚠️ No se pudo guardar perfil: {e}")
+        return False
 
-def get_profile(uid):
-    """Obtiene el perfil del cliente"""
-    doc = db.collection("clientes").document(uid).get()
-    if doc.exists:
-        return doc.to_dict()
-    return None
+def get_profile_via_rest(uid):
+    """Obtener perfil con manejo de errores"""
+    try:
+        url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if 'fields' in data:
+                return {
+                    'nombre': data['fields'].get('nombre', {}).get('stringValue', ''),
+                    'email': data['fields'].get('email', {}).get('stringValue', ''),
+                    'puntos': data['fields'].get('puntos', {}).get('integerValue', 0)
+                }
+        elif response.status_code == 404:
+            return None  # Documento no existe
+        else:
+            return None
+            
+    except:
+        return None
 
-def update_points(uid, delta):
-    """Suma o resta puntos"""
-    doc_ref = db.collection("clientes").document(uid)
-    doc = doc_ref.get()
-    if doc.exists:
-        current = doc.to_dict().get("puntos", 0)
-        new_value = max(0, current + delta)
-        doc_ref.update({"puntos": new_value})
-        return new_value
-    return 0
+def update_points_via_rest(uid, delta):
+    """Actualizar puntos con manejo robusto"""
+    try:
+        perfil = get_profile_via_rest(uid)
+        if perfil:
+            current_points = perfil.get('puntos', 0)
+            new_points = max(0, current_points + delta)
+            
+            url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
+            update_data = {
+                "fields": {
+                    "puntos": {"integerValue": new_points}
+                }
+            }
+            
+            response = requests.patch(url, json=update_data)
+            return new_points if response.status_code == 200 else current_points
+        return 0
+    except:
+        return 0
 
 # ==================================================
-# INTERFAZ DE USUARIO
+# INTERFAZ PRINCIPAL
 # ==================================================
 
-st.title("🎨 App de Clientes - Arte París")
+st.set_page_config(page_title="Arte París", page_icon="🎨", layout="centered")
+
+st.title("🎨 Arte París")
 st.markdown("---")
 
-# Manejo de sesión
+# Verificación inicial
+if not FIREBASE_CONFIG["API_KEY"] or FIREBASE_CONFIG["API_KEY"] == "tu_api_key_aqui":
+    st.error("❌ Configura la API_KEY de Firebase en el código")
+    st.stop()
+
+# Estado de la sesión
 if "user" not in st.session_state:
-    st.session_state["user"] = None
+    st.session_state.user = None
 
-if st.session_state["user"]:
-    # Usuario logueado
-    user_info = st.session_state["user"]
+if st.session_state.user:
+    # === USUARIO LOGUEADO ===
+    user_info = st.session_state.user
     uid = user_info["localId"]
-
-    st.success(f"✨ Bienvenido {user_info['email']}")
-
-    perfil = get_profile(uid)
+    
+    st.success(f"✨ ¡Bienvenido {user_info['email']}!")
+    
+    # Obtener perfil
+    perfil = get_profile_via_rest(uid)
+    
     if perfil:
         st.subheader("📊 Tu Perfil")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.info(f"**Nombre:** {perfil['nombre']}")
-            st.info(f"**Email:** {perfil['email']}")
-        with col2:
-            st.success(f"**Puntos:** {perfil['puntos']} ⭐")
+        st.write(f"**Nombre:** {perfil['nombre']}")
+        st.write(f"**Email:** {perfil['email']}")
+        st.write(f"**Puntos:** {perfil['puntos']} ⭐")
         
         st.subheader("🎯 Gestión de Puntos")
         col1, col2 = st.columns(2)
+        
         with col1:
             if st.button("🎁 +10 Puntos", use_container_width=True):
-                new_points = update_points(uid, 10)
+                new_points = update_points_via_rest(uid, 10)
                 st.success(f"¡Ahora tienes {new_points} puntos!")
                 st.rerun()
+        
         with col2:
             if st.button("🔄 Canjear 50 Puntos", use_container_width=True):
-                if perfil["puntos"] >= 50:
-                    new_points = update_points(uid, -50)
-                    st.success(f"✅ Canjeado! Te quedan {new_points} puntos")
+                if perfil['puntos'] >= 50:
+                    new_points = update_points_via_rest(uid, -50)
+                    st.success(f"✅ Canjeado! Puntos restantes: {new_points}")
                     st.rerun()
                 else:
-                    st.warning("❌ No tienes puntos suficientes")
+                    st.error("❌ Puntos insuficientes")
+    
+    else:
+        st.warning("⚠️ Perfil no encontrado en Firestore")
+        st.info("""
+        **Posibles soluciones:**
+        1. **Las reglas de Firestore están bloqueando el acceso**
+        2. **El perfil no se creó correctamente**
+        
+        **Solución rápida:** Ve a Firestore → Reglas y usa reglas temporales abiertas.
+        """)
+        
+        if st.button("🔄 Reintentar carga de perfil"):
+            st.rerun()
     
     st.markdown("---")
     if st.button("🚪 Cerrar Sesión"):
-        st.session_state["user"] = None
+        st.session_state.user = None
         st.rerun()
 
 else:
-    # Usuario no logueado
-    st.subheader("🔐 Inicio de Sesión")
+    # === USUARIO NO LOGUEADO ===
+    st.subheader("🔐 Acceso al Sistema")
     
-    tab1, tab2 = st.tabs(["📝 Registro", "🚀 Login"])
+    tab1, tab2 = st.tabs(["🚀 Login", "📝 Registro"])
     
     with tab1:
+        with st.form("login_form"):
+            email = st.text_input("Email")
+            password = st.text_input("Contraseña", type="password")
+            
+            if st.form_submit_button("Ingresar"):
+                if email and password:
+                    try:
+                        user_info = login_user(email, password)
+                        st.session_state.user = user_info
+                        st.success("✅ Login exitoso!")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"❌ {e}")
+                else:
+                    st.warning("⚠️ Completa todos los campos")
+    
+    with tab2:
         with st.form("registro_form"):
-            st.write("**Crear nueva cuenta**")
             nombre = st.text_input("Nombre completo")
             email = st.text_input("Email")
             password = st.text_input("Contraseña", type="password")
@@ -181,31 +258,52 @@ else:
             if st.form_submit_button("Crear Cuenta"):
                 if nombre and email and password:
                     try:
-                        user = auth.create_user(email=email, password=password)
-                        save_profile(user.uid, nombre, email)
-                        st.success("✅ Cuenta creada! Ya puedes iniciar sesión.")
-                    except Exception as e:
-                        st.error(f"❌ Error: {e}")
-                else:
-                    st.warning("⚠️ Completa todos los campos")
-    
-    with tab2:
-        with st.form("login_form"):
-            st.write("**Acceder a tu cuenta**")
-            email = st.text_input("Email", key="login_email")
-            password = st.text_input("Contraseña", type="password", key="login_password")
-            
-            if st.form_submit_button("Iniciar Sesión"):
-                if email and password:
-                    try:
-                        user_info = login_user(email, password)
-                        st.session_state["user"] = user_info
-                        st.success("✅ ¡Bienvenido!")
+                        user_info = signup_user(email, password, nombre)
+                        st.session_state.user = user_info
+                        st.success("✅ ¡Cuenta creada!")
                         st.rerun()
                     except Exception as e:
-                        st.error(f"❌ Error: {e}")
+                        st.error(f"❌ {e}")
                 else:
-                    st.warning("⚠️ Ingresa email y contraseña")
+                    st.warning("⚠️ Completa todos los campos")
+
+# ==================================================
+# PANEL DE CONFIGURACIÓN Y AYUDA
+# ==================================================
+
+with st.sidebar:
+    st.header("🔧 Configuración")
+    
+    if st.button("🔄 Verificar Conexión Firebase"):
+        try:
+            # Test simple de Authentication
+            test_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_CONFIG['API_KEY']}"
+            response = requests.post(test_url, json={"returnSecureToken": True})
+            if response.status_code != 400:  # 400 es normal sin datos
+                st.success("✅ Firebase Authentication: CONECTADO")
+            else:
+                st.error("❌ Firebase Authentication: ERROR")
+        except:
+            st.error("❌ No se pudo conectar a Firebase")
+    
+    st.markdown("---")
+    st.header("📋 Reglas Firestore (CRÍTICO)")
+    
+    st.code("""
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /clientes/{userId} {
+      allow read, write: if request.auth != null 
+        && request.auth.uid == userId;
+    }
+    // Temporal para desarrollo:
+    // allow read, write: if true;
+  }
+}
+""", language="javascript")
+    
+    st.info("**Para desarrollo, usa reglas abiertas temporalmente**")
 
 st.markdown("---")
-st.markdown("💎 *Sistema de fidelización - Arte París*")
+st.caption("💎 Arte París - Sistema de fidelización")
