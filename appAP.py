@@ -1,6 +1,6 @@
 import streamlit as st
 from datetime import datetime
-import pyrebase4 as pyrebase  # 👈 usamos pyrebase4, no pyrebase
+import pyrebase  
 import firebase_admin
 from firebase_admin import credentials, firestore
 
