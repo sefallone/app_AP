@@ -1,4 +1,4 @@
-pandas
 streamlit
-pyrebase
-
+pyrebase4
+firebase-admin
+google-cloud-firestore
