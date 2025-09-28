@@ -390,7 +390,7 @@ st.markdown("""
 # ==================================================
 # GALERÍA DE INSPIRACIÓN - MODIFICAR IMÁGENES/TEXTOS
 # ==================================================
-st.subheader("🎭 Inspirado en la Belleza del Arte")  <!-- MODIFICAR título -->
+st.subheader("🎭 Inspirado en la Belleza del Arte")  
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
