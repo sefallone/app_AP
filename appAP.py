@@ -342,7 +342,7 @@ st.markdown("""
         padding: 1.5rem;
         border-radius: 15px;
         margin: 1rem 0;
-        color: white;
+        color: Black;
         text-align: center;
     }
     .birthday-card {
@@ -357,7 +357,7 @@ st.markdown("""
     .stButton>button {
         width: 100%;
         background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-        color: white;
+        color: black;
         border: none;
         padding: 0.75rem;
         border-radius: 25px;
