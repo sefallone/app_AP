@@ -307,7 +307,7 @@ st.markdown("""
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     .product-card {
-        background: white;
+        background: blue;
         padding: 1.5rem;
         border-radius: 15px;
         margin: 1rem 0;
