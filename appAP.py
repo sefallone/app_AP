@@ -117,7 +117,7 @@ def cargar_imagen_local(ruta_imagen, ancho_maximo=400):
             st.error(f"❌ No se encontró: {ruta_imagen}")
             # Placeholder genérico
             st.image("https://via.placeholder.com/300x200/8B4513/FFFFFF?text=Imagen+No+Encontrada", 
-                    use_column_width=True)
+                    use_container_width =True)
             return False
     except Exception as e:
         st.error(f"❌ Error cargando imagen: {e}")
