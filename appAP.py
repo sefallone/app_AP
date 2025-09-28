@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Arte París", layout="wide")
 
-# ==== CSS estilo Starbucks ====
+# ==== CSS estilo Starbucks Desktop ====
 st.markdown("""
 <style>
 body {
@@ -30,9 +30,19 @@ body {
     margin-left: 30px;
     text-decoration: none;
     font-weight: 600;
+    position: relative;
 }
-.navbar a:hover {
-    color: #8B4513;
+.navbar a::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px;
+    background: #8B4513;
+    transition: width .3s;
+    margin-top: 4px;
+}
+.navbar a:hover::after {
+    width: 100%;
 }
 .hero {
     height: 90vh;
@@ -47,25 +57,38 @@ body {
     text-shadow: 0px 2px 6px rgba(0,0,0,0.5);
 }
 .hero h1 {
-    font-size: 3.5rem;
+    font-size: 3.8rem;
+}
+.hero p {
+    font-size: 1.3rem;
+    margin-top: 10px;
 }
 .hero a {
-    margin-top: 20px;
+    margin-top: 25px;
     background: #8B4513;
     color: white;
-    padding: 14px 30px;
+    padding: 14px 36px;
     border-radius: 30px;
     text-decoration: none;
     font-weight: bold;
+    transition: background 0.3s;
+}
+.hero a:hover {
+    background: #A0522D;
 }
 .section {
-    padding: 6rem 4rem;
-    text-align: center;
+    padding: 6rem 6rem;
+}
+.section h2 {
+    font-size: 2.2rem;
+    color: #4b2e2e;
+    margin-bottom: 2rem;
 }
 .section img {
     width: 100%;
     border-radius: 16px;
     margin-top: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .footer {
     text-align: center;
@@ -73,6 +96,15 @@ body {
     background: #f8f8f8;
     color: #555;
     margin-top: 3rem;
+}
+.footer a {
+    text-decoration: none;
+    margin: 0 10px;
+    color: #333;
+    font-weight: 600;
+}
+.footer a:hover {
+    color: #8B4513;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -102,8 +134,8 @@ st.markdown("""
 # ==== Productos ====
 st.markdown('<div id="productos" class="section">', unsafe_allow_html=True)
 st.markdown("## 🥐 Nuestros Productos")
-col1, col2 = st.columns(2)
 
+col1, col2 = st.columns(2)
 with col1:
     st.image("https://images.unsplash.com/photo-1509440159596-0249088772ff")
     st.subheader("Bollería")
@@ -115,9 +147,8 @@ with col2:
     st.subheader("Dulces Secos")
     st.write("Perfectos para acompañar tu café en cualquier momento.")
     st.button("Ver más", key="dulces")
-    
-col3, col4 = st.columns(2)
 
+col3, col4 = st.columns(2)
 with col3:
     st.image("https://images.unsplash.com/photo-1548943487-a2e4e43b4853")
     st.subheader("Pastelería Fría")
@@ -174,5 +205,4 @@ st.markdown("""
     </p>
 </div>
 """, unsafe_allow_html=True)
-
 
