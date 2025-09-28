@@ -1,3 +1,6 @@
+# ==================================================
+# IMPORTACIONES Y CONFIGURACIÓN INICIAL
+# ==================================================
 import streamlit as st
 import requests
 import json
@@ -5,18 +8,16 @@ import time
 from datetime import datetime
 
 # ==================================================
-# CONFIGURACIÓN FIREBASE (mantener igual)
+# CONFIGURACIÓN FIREBASE - REEMPLAZAR CON TUS DATOS
 # ==================================================
-
 FIREBASE_CONFIG = {
-    "API_KEY": "AIzaSyAr3RChPqT89oy_dBakL7PO_qU03TTLE0k",
-    "PROJECT_ID": "webap-6e49a"
+    "API_KEY": "AIzaSyAr3RChPqT89oy_dBakL7PO_qU03TTLE0k",  # REEMPLAZAR con tu API Key
+    "PROJECT_ID": "webap-6e49a"  # REEMPLAZAR con tu Project ID
 }
 
 # ==================================================
-# DATOS DE PRODUCTOS Y OFERTAS
+# DATOS DE PRODUCTOS - MODIFICAR SEGÚN TUS PRODUCTOS
 # ==================================================
-
 PRODUCTOS = [
     {
         "nombre": "Caja de Macarons Surpresa",
@@ -62,6 +63,9 @@ PRODUCTOS = [
     }
 ]
 
+# ==================================================
+# OFERTAS ESPECIALES - MODIFICAR SEGÚN TUS OFERTAS
+# ==================================================
 OFERTAS_ESPECIALES = [
     {
         "titulo": "🎨 Obra Maestra del Mes",
@@ -80,9 +84,8 @@ OFERTAS_ESPECIALES = [
 ]
 
 # ==================================================
-# FUNCIONES (mantener igual que antes)
+# FUNCIÓN: REGISTRAR USUARIO - NO MODIFICAR
 # ==================================================
-
 def signup_user(email, password, nombre):
     """Registrar usuario con bono de 10 puntos"""
     try:
@@ -110,6 +113,9 @@ def signup_user(email, password, nombre):
     except Exception as e:
         raise Exception(f"Error en registro: {str(e)}")
 
+# ==================================================
+# FUNCIÓN: LOGIN USUARIO - NO MODIFICAR
+# ==================================================
 def login_user(email, password):
     """Login con Firebase REST API"""
     try:
@@ -133,6 +139,9 @@ def login_user(email, password):
     except Exception as e:
         raise Exception(f"Error en login: {str(e)}")
 
+# ==================================================
+# FUNCIÓN: GUARDAR PERFIL - NO MODIFICAR
+# ==================================================
 def save_profile_via_rest(uid, nombre, email, bonus_points=0):
     """Guardar perfil con puntos de bono"""
     try:
@@ -181,6 +190,9 @@ def save_profile_via_rest(uid, nombre, email, bonus_points=0):
         st.warning(f"⚠️ No se pudo guardar perfil: {e}")
         return False
 
+# ==================================================
+# FUNCIÓN: OBTENER PERFIL - NO MODIFICAR
+# ==================================================
 def get_profile_via_rest(uid):
     """Obtener perfil con información extendida"""
     try:
@@ -206,6 +218,9 @@ def get_profile_via_rest(uid):
     except:
         return None
 
+# ==================================================
+# FUNCIÓN: ACTUALIZAR PUNTOS - NO MODIFICAR
+# ==================================================
 def update_points_via_rest(uid, delta):
     """Actualizar puntos"""
     try:
@@ -227,6 +242,9 @@ def update_points_via_rest(uid, delta):
     except:
         return 0
 
+# ==================================================
+# FUNCIÓN: REGISTRAR TICKET COMPRA - NO MODIFICAR
+# ==================================================
 def registrar_ticket_compra(uid, monto_compra, numero_ticket):
     """Registrar ticket de compra y calcular puntos (5 puntos por cada 5$)"""
     try:
@@ -268,17 +286,18 @@ def registrar_ticket_compra(uid, monto_compra, numero_ticket):
         return 0
 
 # ==================================================
-# INTERFAZ MEJORADA - DISEÑO ARTÍSTICO Y ELEGANTE
+# CONFIGURACIÓN DE PÁGINA STREAMLIT - MODIFICAR TÍTULO/ICONO
 # ==================================================
-
 st.set_page_config(
-    page_title="Arte París - Dulces Franceses", 
-    page_icon="🎨", 
+    page_title="Arte París - Dulces Franceses",  # MODIFICAR con el nombre de tu negocio
+    page_icon="🎨",  # MODIFICAR con tu icono preferido
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# CSS personalizado mejorado con tema artístico
+# ==================================================
+# CSS PERSONALIZADO - MODIFICAR COLORES/ESTILOS
+# ==================================================
 st.markdown("""
 <style>
     .main-header {
@@ -307,7 +326,7 @@ st.markdown("""
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     .product-card {
-        background: blue;
+        background: white;
         padding: 1.5rem;
         border-radius: 15px;
         margin: 1rem 0;
@@ -357,41 +376,51 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Header principal con logo artístico
+# ==================================================
+# HEADER PRINCIPAL - MODIFICAR TÍTULO/ESLOGAN
+# ==================================================
 st.markdown("""
 <div class="welcome-section">
-    <h1 style="font-size: 4rem; margin-bottom: 0;">🎨 Arte París</h1>
-    <h3 style="font-style: italic;">Donde cada dulce es una obra maestra</h3>
-    <p style="font-size: 1.2rem; margin-top: 1rem;">✨ <strong>¡Sé nuestro artista preferido!</strong> ✨</p>
+    <h1 style="font-size: 4rem; margin-bottom: 0;">🎨 Arte París</h1>  <!-- MODIFICAR nombre -->
+    <h3 style="font-style: italic;">Donde cada dulce es una obra maestra</h3>  <!-- MODIFICAR eslogan -->
+    <p style="font-size: 1.2rem; margin-top: 1rem;">✨ <strong>¡Sé nuestro artista preferido!</strong> ✨</p>  <!-- MODIFICAR frase -->
 </div>
 """, unsafe_allow_html=True)
 
-# Galería de inspiración artística
-st.subheader("🎭 Inspirado en la Belleza del Arte")
+# ==================================================
+# GALERÍA DE INSPIRACIÓN - MODIFICAR IMÁGENES/TEXTOS
+# ==================================================
+st.subheader("🎭 Inspirado en la Belleza del Arte")  <!-- MODIFICAR título -->
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.image("https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=200", caption="🎨 Monet - Inspiración Impresionista")
+    st.image("https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=200", caption="🎨 Monet - Inspiración Impresionista")  <!-- MODIFICAR imagen/texto -->
 with col2:
-    st.image("https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=200", caption="📚 Cultura Francesa")
+    st.image("https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=200", caption="📚 Cultura Francesa")  <!-- MODIFICAR imagen/texto -->
 with col3:
-    st.image("https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=200", caption="🎬 Cine de Arte")
+    st.image("https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=200", caption="🎬 Cine de Arte")  <!-- MODIFICAR imagen/texto -->
 with col4:
-    st.image("https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=200", caption="🏛️ Arte Clásico")
+    st.image("https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=200", caption="🏛️ Arte Clásico")  <!-- MODIFICAR imagen/texto -->
 
 st.markdown("---")
 
-# Verificación inicial
+# ==================================================
+# VERIFICACIÓN CONFIGURACIÓN FIREBASE - NO MODIFICAR
+# ==================================================
 if not FIREBASE_CONFIG["API_KEY"] or FIREBASE_CONFIG["API_KEY"] == "tu_api_key_aqui":
     st.error("❌ Configura la API_KEY de Firebase en el código")
     st.stop()
 
-# Estado de la sesión
+# ==================================================
+# MANEJO DE SESIÓN USUARIO - NO MODIFICAR
+# ==================================================
 if "user" not in st.session_state:
     st.session_state.user = None
 
+# ==================================================
+# INTERFAZ USUARIO LOGUEADO - MODIFICAR TEXTO/ESTILOS
+# ==================================================
 if st.session_state.user:
-    # === USUARIO LOGUEADO ===
     user_info = st.session_state.user
     uid = user_info["localId"]
     
@@ -399,32 +428,49 @@ if st.session_state.user:
     perfil = get_profile_via_rest(uid)
     
     if perfil:
-        # Bienvenida personalizada
+        # VALIDACIÓN SEGURA DE PUNTOS - NO MODIFICAR
+        try:
+            puntos_usuario = int(perfil.get('puntos', 0))
+        except (TypeError, ValueError):
+            puntos_usuario = 0
+            st.warning("⚠️ Se detectó un problema con tus puntos, se han establecido en 0")
+        
+        # BIENVENIDA PERSONALIZADA - MODIFICAR TEXTO
         st.success(f"✨ ¡Bienvenido de nuevo, {perfil['nombre']}! Eres nuestro artista preferido 🎨")
         
-        # Tarjeta de puntos principal
+        # TARJETA DE PUNTOS PRINCIPAL - MODIFICAR ESTILOS
         col1, col2, col3 = st.columns([2, 1, 2])
         
         with col2:
             st.markdown(f"""
             <div class="point-card">
-                <h3>⭐ Tus Puntos de Arte</h3>
-                <h1 style="font-size: 4rem; margin: 0;">{perfil['puntos']}</h1>
-                <p>Puntos acumulados</p>
+                <h3>⭐ Tus Puntos de Arte</h3>  <!-- MODIFICAR título -->
+                <h1 style="font-size: 4rem; margin: 0;">{puntos_usuario}</h1>
+                <p>Puntos acumulados</p>  <!-- MODIFICAR texto -->
             </div>
             """, unsafe_allow_html=True)
         
-        # SECCIÓN: PRODUCTOS DISPONIBLES
-        st.subheader("🛍️ Galería de Delicias - Canjea tus Puntos")
+        # SECCIÓN: PRODUCTOS DISPONIBLES - MODIFICAR TÍTULO/TEXTO
+        st.subheader("🛍️ Galería de Delicias - Canjea tus Puntos")  <!-- MODIFICAR título -->
         
-        # Filtrar productos que el usuario puede canjear
-        productos_disponibles = [p for p in PRODUCTOS if p['puntos'] <= perfil['puntos']]
-        productos_no_disponibles = [p for p in PRODUCTOS if p['puntos'] > perfil['puntos']]
+        # FILTRADO DE PRODUCTOS - NO MODIFICAR LÓGICA
+        productos_disponibles = []
+        productos_no_disponibles = []
         
+        for producto in PRODUCTOS:
+            try:
+                puntos_producto = int(producto['puntos'])
+                if puntos_producto <= puntos_usuario:
+                    productos_disponibles.append(producto)
+                else:
+                    productos_no_disponibles.append(producto)
+            except (KeyError, TypeError, ValueError):
+                continue
+        
+        # MOSTRAR PRODUCTOS DISPONIBLES - MODIFICAR TEXTO/ESTILOS
         if productos_disponibles:
-            st.success(f"🎉 ¡Puedes canjear {len(productos_disponibles)} productos!")
+            st.success(f"🎉 ¡Puedes canjear {len(productos_disponibles)} productos!")  <!-- MODIFICAR texto -->
             
-            # Mostrar productos disponibles en columnas
             cols = st.columns(3)
             for idx, producto in enumerate(productos_disponibles):
                 with cols[idx % 3]:
@@ -436,120 +482,182 @@ if st.session_state.user:
                                 <div class="offer-badge">⭐ {producto['puntos']} pts</div>
                             </div>
                             <h4>{producto['nombre']}</h4>
-                            <p>💎 <s>${producto['precio_original']}</s> <strong>GRATIS con puntos</strong></p>
+                            <p>💎 <s>${producto['precio_original']}</s> <strong>GRATIS con puntos</strong></p>  <!-- MODIFICAR texto -->
                         </div>
                         """, unsafe_allow_html=True)
                         
                         if st.button(f"🎁 Canjear {producto['puntos']} puntos", key=f"canjear_{idx}"):
-                            if perfil['puntos'] >= producto['puntos']:
+                            if puntos_usuario >= producto['puntos']:
                                 nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
-                                st.success(f"🎨 ¡Felicidades! Has canjeado '{producto['nombre']}' por {producto['puntos']} puntos")
-                                st.balloons()
-                                st.rerun()
+                                if nuevos_puntos >= 0:
+                                    st.success(f"🎨 ¡Felicidades! Has canjeado '{producto['nombre']}' por {producto['puntos']} puntos")  <!-- MODIFICAR texto -->
+                                    st.balloons()
+                                    time.sleep(2)
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Error al procesar el canje")
+        else:
+            st.info("💫 Aún no tienes suficientes puntos para canjear productos. ¡Sigue acumulando!")  <!-- MODIFICAR texto -->
+            
+            # PRODUCTOS POR ALCANZAR - MODIFICAR TÍTULO/TEXTO
+            st.subheader("🎯 Productos por Alcanzar")  <!-- MODIFICAR título -->
+            cols = st.columns(3)
+            for idx, producto in enumerate(productos_no_disponibles[:3]):
+                with cols[idx % 3]:
+                    st.markdown(f"""
+                    <div class="product-card" style="opacity: 0.7;">
+                        <img src="{producto['imagen']}" width="100%" style="border-radius: 10px;">
+                        <h4>{producto['nombre']}</h4>
+                        <p>⭐ Necesitas {producto['puntos']} puntos</p>  <!-- MODIFICAR texto -->
+                        <p><small>Te faltan: {producto['puntos'] - puntos_usuario} puntos</small></p>  <!-- MODIFICAR texto -->
+                    </div>
+                    """, unsafe_allow_html=True)
         
-        # SECCIÓN: OFERTAS EXCLUSIVAS ARTE PARÍS CLUB
-        st.subheader("🎪 Ofertas Exclusivas ArteParísClub")
+        # SECCIÓN: OFERTAS EXCLUSIVAS - MODIFICAR TÍTULO/TEXTO
+        st.subheader("🎪 Ofertas Exclusivas ArteParísClub")  <!-- MODIFICAR título -->
         
         for oferta in OFERTAS_ESPECIALES:
             col1, col2 = st.columns([1, 2])
             with col1:
                 st.image(oferta['imagen'], use_column_width=True)
             with col2:
+                disponible = puntos_usuario >= oferta['puntos']
                 st.markdown(f"""
                 <div class="art-card">
                     <h3>{oferta['titulo']}</h3>
                     <p>{oferta['descripcion']}</p>
                     <h4>💎 {oferta['puntos']} Puntos</h4>
-                    {"✅ DISPONIBLE" if perfil['puntos'] >= oferta['puntos'] else "❌ Necesitas más puntos"}
+                    {"✅ DISPONIBLE" if disponible else "❌ Necesitas más puntos"}  <!-- MODIFICAR texto -->
                 </div>
                 """, unsafe_allow_html=True)
                 
-                if perfil['puntos'] >= oferta['puntos']:
+                if disponible:
                     if st.button(f"🎪 Canjear Oferta Especial - {oferta['puntos']} puntos", key=f"oferta_{oferta['titulo']}"):
                         nuevos_puntos = update_points_via_rest(uid, -oferta['puntos'])
-                        st.success(f"✨ ¡Obra maestra adquirida! {oferta['titulo']}")
-                        st.rerun()
+                        if nuevos_puntos >= 0:
+                            st.success(f"✨ ¡Obra maestra adquirida! {oferta['titulo']}")  <!-- MODIFICAR texto -->
+                            st.balloons()
+                            time.sleep(2)
+                            st.rerun()
+                        else:
+                            st.error("❌ Error al procesar el canje")
         
-        # SECCIÓN: PROGRESIÓN Y ESTADÍSTICAS
-        st.subheader("📊 Tu Trayectoria Artística")
+        # SECCIÓN: ESTADÍSTICAS - MODIFICAR TÍTULO/TEXTO
+        st.subheader("📊 Tu Trayectoria Artística")  <!-- MODIFICAR título -->
+        
+        # VALIDACIÓN CAMPOS NUMÉRICOS - NO MODIFICAR
+        try:
+            total_compras = float(perfil.get('total_compras', 0))
+        except (TypeError, ValueError):
+            total_compras = 0.0
+            
+        try:
+            tickets_registrados = int(perfil.get('tickets_registrados', 0))
+        except (TypeError, ValueError):
+            tickets_registrados = 0
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("💰 Total Gastado", f"${perfil['total_compras']:.2f}")
+            st.metric("💰 Total Gastado", f"${total_compras:.2f}")  <!-- MODIFICAR texto -->
         with col2:
-            st.metric("🎫 Tickets Registrados", perfil['tickets_registrados'])
+            st.metric("🎫 Tickets Registrados", tickets_registrados)  <!-- MODIFICAR texto -->
         with col3:
-            st.metric("👑 Nivel Actual", "Artista Novato" if perfil['puntos'] < 100 else "Artista Consagrado")
+            # SISTEMA DE NIVELES - MODIFICAR CRITERIOS/TEXTOS
+            if puntos_usuario < 50:
+                nivel = "🎨 Aprendiz"
+            elif puntos_usuario < 100:
+                nivel = "⭐ Artista"
+            elif puntos_usuario < 200:
+                nivel = "👑 Maestro"
+            else:
+                nivel = "💎 Leyenda"
+            st.metric("👑 Nivel Actual", nivel)  <!-- MODIFICAR texto -->
         
-        # Sección de gestión de puntos (mantener funcionalidades existentes)
-        st.subheader("🎯 Sigue Sumando Puntos")
+        # SECCIÓN: GESTIÓN DE PUNTOS - MODIFICAR TÍTULO/TEXTO
+        st.subheader("🎯 Sigue Sumando Puntos")  <!-- MODIFICAR título -->
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("🎁 Registrar Nueva Compra", use_container_width=True):
-                with st.form("nueva_compra"):
-                    ticket = st.text_input("Número de Ticket")
-                    monto = st.number_input("Monto ($)", min_value=0.0, step=0.5)
-                    if st.form_submit_button("📥 Registrar"):
-                        if ticket and monto > 0:
-                            puntos_ganados = registrar_ticket_compra(uid, monto, ticket)
-                            st.success(f"¡+{puntos_ganados} puntos! Total: {perfil['puntos'] + puntos_ganados}")
-                            st.rerun()
+            if st.button("🎁 Registrar Nueva Compra", use_container_width=True):  <!-- MODIFICAR texto -->
+                with st.form("nueva_compra_form"):
+                    st.write("**📝 Registrar Nueva Compra**")  <!-- MODIFICAR texto -->
+                    numero_ticket = st.text_input("Número de Ticket", placeholder="TKT-001")  <!-- MODIFICAR texto -->
+                    monto_compra = st.number_input("Monto de la Compra ($)", min_value=0.0, step=0.5, value=0.0)  <!-- MODIFICAR texto -->
+                    
+                    if st.form_submit_button("📥 Registrar Compra"):  <!-- MODIFICAR texto -->
+                        if numero_ticket.strip() and monto_compra > 0:
+                            puntos_ganados = registrar_ticket_compra(uid, monto_compra, numero_ticket)
+                            if puntos_ganados > 0:
+                                st.success(f"✅ ¡Compra registrada! Ganaste {puntos_ganados} puntos")  <!-- MODIFICAR texto -->
+                                time.sleep(2)
+                                st.rerun()
+                            else:
+                                st.error("❌ Error al registrar la compra")
+                        else:
+                            st.warning("⚠️ Ingresa un número de ticket y monto válidos")  <!-- MODIFICAR texto -->
         
         with col2:
-            if st.button("✨ +5 Puntos de Cortesía", use_container_width=True):
+            if st.button("✨ +5 Puntos de Cortesía", use_container_width=True):  <!-- MODIFICAR texto -->
                 nuevos_puntos = update_points_via_rest(uid, 5)
-                st.success(f"¡+5 puntos de cortesía! Ahora tienes {nuevos_puntos} puntos")
-                st.rerun()
+                if nuevos_puntos > puntos_usuario:
+                    st.success(f"🎉 ¡+5 puntos de cortesía! Ahora tienes {nuevos_puntos} puntos")  <!-- MODIFICAR texto -->
+                    time.sleep(2)
+                    st.rerun()
+                else:
+                    st.error("❌ Error al agregar puntos")
     
     else:
-        st.warning("⚠️ Perfil no encontrado")
+        st.error("❌ No se pudo cargar tu perfil. Por favor, recarga la página.")  <!-- MODIFICAR texto -->
         
+        if st.button("🔄 Recargar Perfil"):  <!-- MODIFICAR texto -->
+            st.rerun()
+    
     st.markdown("---")
-    if st.button("🚪 Cerrar Sesión"):
+    if st.button("🚪 Cerrar Sesión"):  <!-- MODIFICAR texto -->
         st.session_state.user = None
         st.rerun()
 
+# ==================================================
+# INTERFAZ USUARIO NO LOGUEADO - MODIFICAR TEXTO/ESTILOS
+# ==================================================
 else:
-    # === USUARIO NO LOGUEADO - DISEÑO MEJORADO ===
-    
     col1, col2 = st.columns([1, 1])
     
     with col1:
         st.markdown("""
         <div class="login-container">
-            <h2 style="text-align: center; color: #764ba2;">🎨 Únete a Nuestra Galería</h2>
-            <p style="text-align: center;">✨ <strong>¡Sé nuestro artista preferido!</strong></p>
+            <h2 style="text-align: center; color: #764ba2;">🎨 Únete a Nuestra Galería</h2>  <!-- MODIFICAR texto -->
+            <p style="text-align: center;">✨ <strong>¡Sé nuestro artista preferido!</strong></p>  <!-- MODIFICAR texto -->
         """, unsafe_allow_html=True)
         
-        tab1, tab2 = st.tabs(["🚀 Ingresar", "📝 Crear Cuenta"])
+        tab1, tab2 = st.tabs(["🚀 Ingresar", "📝 Crear Cuenta"])  <!-- MODIFICAR textos -->
         
         with tab1:
-            st.info("¿Ya eres parte de nuestra comunidad artística?")
+            st.info("¿Ya eres parte de nuestra comunidad artística?")  <!-- MODIFICAR texto -->
             with st.form("login_form"):
-                email = st.text_input("📧 Email", placeholder="tu@email.com")
-                password = st.text_input("🔒 Contraseña", type="password")
+                email = st.text_input("📧 Email", placeholder="tu@email.com")  <!-- MODIFICAR texto -->
+                password = st.text_input("🔒 Contraseña", type="password")  <!-- MODIFICAR texto -->
                 
-                if st.form_submit_button("🎯 Ingresar a Mi Galería"):
+                if st.form_submit_button("🎯 Ingresar a Mi Galería"):  <!-- MODIFICAR texto -->
                     if email and password:
                         try:
                             user_info = login_user(email, password)
                             st.session_state.user = user_info
-                            st.success("✅ ¡Bienvenido a tu espacio creativo!")
+                            st.success("✅ ¡Bienvenido a tu espacio creativo!")  <!-- MODIFICAR texto -->
                             st.rerun()
                         except Exception as e:
                             st.error(f"❌ {e}")
                     else:
-                        st.warning("⚠️ Completa todos los campos")
+                        st.warning("⚠️ Completa todos los campos")  <!-- MODIFICAR texto -->
         
         with tab2:
-            st.success("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")
+            st.success("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")  <!-- MODIFICAR texto -->
             with st.form("registro_form"):
-                nombre = st.text_input("👤 Nombre completo", placeholder="Claude Monet")
-                email = st.text_input("📧 Email", placeholder="claude@arteparis.com")
-                password = st.text_input("🔒 Contraseña", type="password")
+                nombre = st.text_input("👤 Nombre completo", placeholder="Claude Monet")  <!-- MODIFICAR texto -->
+                email = st.text_input("📧 Email", placeholder="claude@arteparis.com")  <!-- MODIFICAR texto -->
+                password = st.text_input("🔒 Contraseña", type="password")  <!-- MODIFICAR texto -->
                 
-                if st.form_submit_button("🎨 Unirme al Arte París Club"):
+                if st.form_submit_button("🎨 Unirme al Arte París Club"):  <!-- MODIFICAR texto -->
                     if nombre and email and password:
                         try:
                             user_info = signup_user(email, password, nombre)
@@ -564,41 +672,43 @@ else:
                             - Canjear puntos por obras maestras dulces
                             - Acceder a ofertas exclusivas
                             - Participar en eventos especiales
-                            """)
+                            """)  <!-- MODIFICAR texto -->
                             st.rerun()
                         except Exception as e:
                             st.error(f"❌ {e}")
                     else:
-                        st.warning("⚠️ Completa todos los campos")
+                        st.warning("⚠️ Completa todos los campos")  <!-- MODIFICAR texto -->
         
         st.markdown("</div>", unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
         <div style="padding: 2rem;">
-            <h3>🎪 Beneficios Exclusivos</h3>
+            <h3>🎪 Beneficios Exclusivos</h3>  <!-- MODIFICAR título -->
             <div class="product-card">
-                <h4>⭐ Puntos por cada compra</h4>
-                <p>5 puntos por cada $5 gastados</p>
+                <h4>⭐ Puntos por cada compra</h4>  <!-- MODIFICAR texto -->
+                <p>5 puntos por cada $5 gastados</p>  <!-- MODIFICAR texto -->
             </div>
             <div class="product-card">
-                <h4>🎨 Ofertas de Arte</h4>
-                <p>Productos exclusivos inspirados en obras maestras</p>
+                <h4>🎨 Ofertas de Arte</h4>  <!-- MODIFICAR texto -->
+                <p>Productos exclusivos inspirados en obras maestras</p>  <!-- MODIFICAR texto -->
             </div>
             <div class="product-card">
-                <h4>👑 Trato Preferencial</h4>
-                <p>Descuentos y promociones especiales</p>
+                <h4>👑 Trato Preferencial</h4>  <!-- MODIFICAR texto -->
+                <p>Descuentos y promociones especiales</p>  <!-- MODIFICAR texto -->
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-# Footer artístico
+# ==================================================
+# FOOTER - MODIFICAR TEXTO/INFORMACIÓN
+# ==================================================
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 2rem;">
-    <h3>🎨 Arte París</h3>
-    <p><em>"Donde la pastelería se encuentra con el arte"</em></p>
-    <p>✨ <strong>¡Sé nuestro artista preferido!</strong> ✨</p>
-    <p>📍 Cada bocado es una experiencia francesa inolvidable</p>
+    <h3>🎨 Arte París</h3>  <!-- MODIFICAR nombre -->
+    <p><em>"Donde la pastelería se encuentra con el arte"</em></p>  <!-- MODIFICAR eslogan -->
+    <p>✨ <strong>¡Sé nuestro artista preferido!</strong> ✨</p>  <!-- MODIFICAR frase -->
+    <p>📍 Cada bocado es una experiencia francesa inolvidable</p>  <!-- MODIFICAR texto -->
 </div>
 """, unsafe_allow_html=True)
