@@ -111,7 +111,7 @@ def cargar_imagen_local(ruta_imagen, ancho_maximo=400):
     try:
         if os.path.exists(ruta_imagen):
             imagen = Image.open(ruta_imagen)
-            st.image(imagen, use_column_width=True)
+            st.image(imagen, use_container_width =True)
             return True
         else:
             st.error(f"❌ No se encontró: {ruta_imagen}")
