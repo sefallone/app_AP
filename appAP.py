@@ -369,7 +369,7 @@ st.markdown("""
         align-items: center;
         margin: 0.5rem 0;
         padding: 0.5rem;
-        background: #FFF8F0;
+        background: #F0FFFE;
         border-radius: 10px;
         border-left: 4px solid #D2691E;
     }
@@ -483,7 +483,7 @@ if st.session_state.user:
             """, unsafe_allow_html=True)
             
             # Ofertas de cumpleaños
-            fecha_cumpleanos = perfil.get('fecha_cumpleanos')
+            fecha_cumpleanos = perfil.get('fecha_cumpleaños')
             if fecha_cumpleanos and es_cumpleanos_hoy(fecha_cumpleanos):
                 st.markdown(f"""
                 <div class="birthday-card">
@@ -527,7 +527,7 @@ if st.session_state.user:
             st.markdown("""
             <div style="text-align: center; margin-bottom: 1rem;">
                 <h2 style="color: #8B4513; margin: 0;">👤 Tu Perfil</h2>
-                <p style="color: #666;">Gestiona tu cuenta Delicafé</p>
+                <p style="color: #666;">Gestiona tu cuenta Arte París</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -609,7 +609,7 @@ else:
                     st.warning("Por favor completa todos los campos")
     
     with tab2:
-        st.subheader("Únete a la Familia Delicafé")
+        st.subheader("Únete al Club Arte París")
         st.info("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")
         
         with st.form("registro_form"):
@@ -624,7 +624,7 @@ else:
                 help="¡Recibe regalos especiales en tu cumpleaños!"
             )
             
-            if st.form_submit_button("🎨 Unirme a Arte París", use_container_width=True):
+            if st.form_submit_button("Unirme a Arte París", use_container_width=True):
                 if nombre and email and password:
                     try:
                         user_info = signup_user(email, password, nombre, fecha_cumpleanos)
