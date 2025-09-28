@@ -16,16 +16,24 @@ st.markdown("""
         top: 0;
         left: 0;
         right: 0;
-        height: 60px;
+        height: 70px;
         background-color: white;
         border-bottom: 1px solid #eee;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 30px;
+        justify-content: space-between;
+        padding: 0 60px;
         z-index: 999;
     }
-    .navbar button {
+    .navbar .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .navbar .logo img {
+        height: 50px;
+    }
+    .navbar .menu button {
         background: none;
         border: none;
         font-weight: 500;
@@ -33,12 +41,13 @@ st.markdown("""
         color: #333;
         cursor: pointer;
         transition: all 0.3s ease;
+        margin-left: 25px;
     }
-    .navbar button:hover {
+    .navbar .menu button:hover {
         color: #b8860b;
     }
     .content {
-        margin-top: 80px;
+        margin-top: 90px;
         padding: 20px 60px;
     }
     .section img {
@@ -63,10 +72,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Crear la barra de navegación con botones
+# Navbar con logo + botones
 st.markdown('<div class="navbar">', unsafe_allow_html=True)
-col1, col2, col3, col4 = st.columns([1,1,1,1])
+st.markdown("""
+<div class="logo">
+    <img src="https://i.imgur.com/1Q9Z1Zy.png" alt="Arte París Logo">
+    <span><b>Arte París</b></span>
+</div>
+<div class="menu">
+""", unsafe_allow_html=True)
 
+col1, col2, col3, col4 = st.columns([1,1,1,1])
 with col1:
     if st.button("Productos"):
         st.session_state.section = "menu"
@@ -80,9 +96,9 @@ with col4:
     if st.button("Nosotros"):
         st.session_state.section = "nosotros"
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div></div>', unsafe_allow_html=True)
 
-# Estado inicial de la sección
+# Estado inicial
 if "section" not in st.session_state:
     st.session_state.section = "menu"
 
@@ -123,6 +139,7 @@ elif st.session_state.section == "nosotros":
     st.write("Si quieres unirte a nuestro equipo, envía tu CV a rrhh@arteparis.com")
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
