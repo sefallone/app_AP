@@ -609,7 +609,10 @@ else:
                     st.warning("Por favor completa todos los campos")
     
     with tab2:
-        st.subheader("Únete al Club Arte París")
+        st.subheader("Únete al Club Arte París
+            Únete a Arte París® Club para conseguir puntos, que podrás canjear por comida y bebidas gratis, 
+            Podrás hacer pedidos con tu celular, recibirás una recompensa de cumpleaños y mucho más.")
+            
         st.info("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")
         
         with st.form("registro_form"):
@@ -617,7 +620,9 @@ else:
             email = st.text_input("📧 Email", placeholder="tu@email.com")
             password = st.text_input("🔒 Contraseña", type="password", placeholder="Crea una contraseña")
             fecha_cumpleanos = st.date_input(
-                "🎂 Fecha de Cumpleaños (opcional)",
+                "🎂 Fecha de Cumpleaños (opcional) 
+                Añade tu cumpleaños para que podamos felicitarte y enviarte 
+                un vale de regalo tu cumpleaños.",
                 value=None,
                 min_value=date(1900, 1, 1),
                 max_value=date.today(),
