@@ -322,7 +322,7 @@ st.markdown("""
         padding: 0.5rem;
     }
     .hero-section {
-        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        background: linear-gradient(135deg, #46E0E0 0%, #38C7C7 100%);
         padding: 2rem 1rem;
         border-radius: 20px;
         color: white;
@@ -330,7 +330,7 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     .mobile-card {
-        background: green;
+        background: white;
         padding: 1rem;
         border-radius: 15px;
         margin: 0.5rem 0;
