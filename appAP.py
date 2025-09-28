@@ -7,9 +7,11 @@ import json
 import time
 from datetime import datetime, date
 from streamlit_option_menu import option_menu
+from PIL import Image
+import os
 
 # ==================================================
-# CONFIGURACIÓN FIREBASE - REEMPLAZAR CON TUS DATOS
+# CONFIGURACIÓN FIREBASE
 # ==================================================
 FIREBASE_CONFIG = {
     "API_KEY": "AIzaSyAr3RChPqT89oy_dBakL7PO_qU03TTLE0k",
@@ -17,105 +19,134 @@ FIREBASE_CONFIG = {
 }
 
 # ==================================================
-# DATOS DE PRODUCTOS
+# CONFIGURACIÓN DE IMÁGENES LOCALES
+# ==================================================
+# NOTA: Coloca estos archivos en la misma carpeta que tu script
+CONFIG_IMAGENES = {
+    "logo": "Logo nuevo.jpg",           # Tu logo principal
+    "hero": "Cafe1.jpg",       # Imagen hero principal
+    "productos": {
+        "macarons": "Milhojas.jpg",
+        "eclair": "Brazo.jpg",
+        "croissant": "Caracolas.jpg",
+        "cafe_especial": "Cafe.jpg",
+        "tarta_frambuesa": "Milhojas.jpg"
+    },
+    "ofertas": {
+        "cumpleanos": "Brazo.jpg",
+        "combo": "Combo.jpg"
+    }
+}
+
+# ==================================================
+# DATOS DE PRODUCTOS CON IMÁGENES LOCALES
 # ==================================================
 PRODUCTOS = [
     {
         "nombre": "Caja de Macarons Surpresa",
         "puntos": 50,
         "precio_original": 25.00,
-        "imagen": "https://images.unsplash.com/photo-1558326560-355b61cf86f7?w=300",
+        "imagen": CONFIG_IMAGENES["productos"]["macarons"],
         "categoria": "clasico"
     },
     {
         "nombre": "Éclair de Temporada",
         "puntos": 30,
         "precio_original": 12.00,
-        "imagen": "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=300",
+        "imagen": CONFIG_IMAGENES["productos"]["eclair"],
         "categoria": "clasico"
     },
     {
         "nombre": "Croissant Artístico",
         "puntos": 25,
         "precio_original": 8.00,
-        "imagen": "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300",
+        "imagen": CONFIG_IMAGENES["productos"]["croissant"],
         "categoria": "panaderia"
+    },
+    {
+        "nombre": "Café Especial Arte París",
+        "puntos": 15,
+        "precio_original": 5.00,
+        "imagen": CONFIG_IMAGENES["productos"]["cafe_especial"],
+        "categoria": "bebida"
+    },
+    {
+        "nombre": "Tarta de Frambuesa",
+        "puntos": 80,
+        "precio_original": 35.00,
+        "imagen": CONFIG_IMAGENES["productos"]["tarta_frambuesa"],
+        "categoria": "especial"
     }
 ]
 
 # ==================================================
-# CONFIGURACIÓN DE PÁGINA
+# OFERTAS ESPECIALES CON IMÁGENES LOCALES
 # ==================================================
-st.set_page_config(
-    page_title="Arte París Delicafé",
-    page_icon="☕",
-    layout="centered",
-    initial_sidebar_state="collapsed"
-)
+OFERTAS_ESPECIALES = [
+    {
+        "titulo": "🎁 Regalo de Cumpleaños",
+        "descripcion": "Café especial + Dulce sorpresa para tu día",
+        "puntos": 0,
+        "imagen": CONFIG_IMAGENES["ofertas"]["cumpleanos"],
+        "exclusivo": True,
+        "cumpleanos": True
+    },
+    {
+        "titulo": "☕ Combo Mañana Francesa",
+        "descripcion": "Café + Croissant + Macaron",
+        "puntos": 65,
+        "imagen": CONFIG_IMAGENES["ofertas"]["combo"],
+        "exclusivo": True
+    }
+]
 
 # ==================================================
-# CSS MEJORADO
+# FUNCIONES PARA MANEJO DE IMÁGENES LOCALES
 # ==================================================
-st.markdown("""
-<style>
-    .main > div {
-        padding: 0.5rem;
-    }
+def cargar_imagen_local(ruta_imagen, ancho_maximo=400):
+    """
+    Carga una imagen local y la muestra en Streamlit
+    Si no encuentra la imagen, muestra un placeholder
+    """
+    try:
+        if os.path.exists(ruta_imagen):
+            imagen = Image.open(ruta_imagen)
+            st.image(imagen, use_column_width=True)
+            return True
+        else:
+            st.error(f"❌ No se encontró: {ruta_imagen}")
+            # Placeholder genérico
+            st.image("https://via.placeholder.com/300x200/8B4513/FFFFFF?text=Imagen+No+Encontrada", 
+                    use_column_width=True)
+            return False
+    except Exception as e:
+        st.error(f"❌ Error cargando imagen: {e}")
+        return False
+
+def mostrar_logo():
+    """
+    Muestra el logo de la empresa
+    """
+    st.markdown("""
+    <div style="text-align: center; background: white; padding: 1rem; border-radius: 15px; margin: 1rem 0;">
+    """, unsafe_allow_html=True)
     
-    .hero-section {
-        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-        padding: 2rem 1rem;
-        border-radius: 20px;
-        color: white;
-        text-align: center;
-        margin-bottom: 1rem;
-    }
+    if os.path.exists(CONFIG_IMAGENES["logo"]):
+        logo = Image.open(CONFIG_IMAGENES["logo"])
+        st.image(logo, use_column_width=True)
+    else:
+        st.markdown("""
+        <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Ait Paris</h2>
+        <h3 style="color: #D2691E; margin: 0; font-size: 1.2rem;">DELICAFÉ</h3>
+        """, unsafe_allow_html=True)
     
-    .logo-container {
-        background: white;
-        border-radius: 15px;
-        padding: 1rem;
-        margin: 1rem auto;
-        max-width: 200px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .mobile-card {
-        background: white;
-        padding: 1rem;
-        border-radius: 15px;
-        margin: 0.5rem 0;
-        border: 2px solid #f8f9fa;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    }
-    
-    .point-card-mobile {
-        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin: 1rem 0;
-        color: white;
-        text-align: center;
-    }
-    
-    .stButton>button {
-        width: 100%;
-        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-        color: white;
-        border: none;
-        padding: 0.75rem;
-        border-radius: 25px;
-        font-weight: bold;
-        margin: 0.25rem 0;
-    }
-</style>
-""", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================================================
-# FUNCIONES FIREBASE - VERSIÓN SIMPLIFICADA Y ROBUSTA
+# FUNCIONES FIREBASE
 # ==================================================
 def login_user(email, password):
-    """Login simplificado"""
+    """Login con Firebase"""
     try:
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_CONFIG['API_KEY']}"
         payload = json.dumps({
@@ -137,9 +168,8 @@ def login_user(email, password):
         raise Exception(f"Error en login: {str(e)}")
 
 def signup_user(email, password, nombre, fecha_cumpleanos=None):
-    """Registro simplificado"""
+    """Registro de usuario"""
     try:
-        # Primero registrar en Authentication
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_CONFIG['API_KEY']}"
         payload = json.dumps({
             "email": email,
@@ -152,7 +182,8 @@ def signup_user(email, password, nombre, fecha_cumpleanos=None):
         result = response.json()
         
         if response.status_code == 200:
-            # Luego guardar perfil en Firestore
+            st.success("✅ Usuario registrado")
+            time.sleep(1)
             save_profile_via_rest(result['localId'], nombre, email, fecha_cumpleanos, 10)
             return result
         else:
@@ -162,7 +193,7 @@ def signup_user(email, password, nombre, fecha_cumpleanos=None):
         raise Exception(f"Error en registro: {str(e)}")
 
 def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_points=0):
-    """Guardar perfil de manera robusta"""
+    """Guardar perfil en Firestore"""
     try:
         url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
         
@@ -188,7 +219,7 @@ def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_point
         return False
 
 def get_profile_via_rest(uid):
-    """Obtener perfil con manejo de errores mejorado"""
+    """Obtener perfil del usuario"""
     try:
         url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
         response = requests.get(url, timeout=10)
@@ -204,7 +235,6 @@ def get_profile_via_rest(uid):
                     'tickets_registrados': int(data['fields'].get('tickets_registrados', {}).get('integerValue', 0))
                 }
                 
-                # Manejar fecha de cumpleaños
                 if 'fecha_cumpleanos' in data['fields']:
                     fecha_str = data['fields']['fecha_cumpleanos'].get('timestampValue', '')
                     if fecha_str:
@@ -221,7 +251,7 @@ def get_profile_via_rest(uid):
         return None
 
 def update_points_via_rest(uid, delta):
-    """Actualizar puntos simplificado"""
+    """Actualizar puntos del usuario"""
     try:
         perfil = get_profile_via_rest(uid)
         if perfil:
@@ -241,6 +271,111 @@ def update_points_via_rest(uid, delta):
     except:
         return 0
 
+def registrar_ticket_compra(uid, monto_compra, numero_ticket):
+    """Registrar ticket de compra"""
+    try:
+        perfil = get_profile_via_rest(uid)
+        if perfil:
+            puntos_ganados = (monto_compra // 5) * 5
+            nuevo_total_compras = perfil.get('total_compras', 0) + monto_compra
+            nuevos_tickets = perfil.get('tickets_registrados', 0) + 1
+            nuevos_puntos = perfil.get('puntos', 0) + puntos_ganados
+            
+            url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
+            update_data = {
+                "fields": {
+                    "puntos": {"integerValue": nuevos_puntos},
+                    "total_compras": {"doubleValue": nuevo_total_compras},
+                    "tickets_registrados": {"integerValue": nuevos_tickets}
+                }
+            }
+            
+            response = requests.patch(url, json=update_data)
+            return puntos_ganados if response.status_code == 200 else 0
+        return 0
+    except:
+        return 0
+
+def es_cumpleanos_hoy(fecha_cumpleanos):
+    """Verificar si hoy es cumpleaños"""
+    if not fecha_cumpleanos:
+        return False
+    hoy = date.today()
+    return fecha_cumpleanos.month == hoy.month and fecha_cumpleanos.day == hoy.day
+
+# ==================================================
+# CONFIGURACIÓN STREAMLIT
+# ==================================================
+st.set_page_config(
+    page_title="Ait Paris Delicafé",
+    page_icon="☕",
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
+
+# ==================================================
+# CSS PERSONALIZADO
+# ==================================================
+st.markdown("""
+<style>
+    .main > div {
+        padding: 0.5rem;
+    }
+    .hero-section {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        padding: 2rem 1rem;
+        border-radius: 20px;
+        color: white;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    .mobile-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 15px;
+        margin: 0.5rem 0;
+        border: 2px solid #f8f9fa;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    .point-card-mobile {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin: 1rem 0;
+        color: white;
+        text-align: center;
+    }
+    .birthday-card {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        margin: 1rem 0;
+        color: white;
+        text-align: center;
+        border: 2px solid #FF6B6B;
+    }
+    .stButton>button {
+        width: 100%;
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 25px;
+        font-weight: bold;
+        margin: 0.25rem 0;
+    }
+    .benefit-item {
+        display: flex;
+        align-items: center;
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        background: #FFF8F0;
+        border-radius: 10px;
+        border-left: 4px solid #D2691E;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ==================================================
 # MANEJO DE SESIÓN
 # ==================================================
@@ -250,16 +385,13 @@ if "profile" not in st.session_state:
     st.session_state.profile = None
 
 # ==================================================
-# INTERFAZ PRINCIPAL
+# INTERFAZ PRINCIPAL - USUARIO LOGUEADO
 # ==================================================
 if st.session_state.user:
-    # DEBUG: Mostrar información de sesión
-    st.write("🔍 Debug - Usuario en sesión:", st.session_state.user.get('email', 'No email'))
-    
     user_info = st.session_state.user
     uid = user_info["localId"]
     
-    # Cargar perfil una vez por sesión
+    # Cargar perfil
     if st.session_state.profile is None:
         with st.spinner("Cargando tu perfil..."):
             st.session_state.profile = get_profile_via_rest(uid)
@@ -269,7 +401,7 @@ if st.session_state.user:
     if perfil:
         puntos_usuario = perfil.get('puntos', 0)
         
-        # NAVEGACIÓN
+        # NAVEGACIÓN MÓVIL
         with st.container():
             selected = option_menu(
                 menu_title=None,
@@ -290,13 +422,11 @@ if st.session_state.user:
         if selected == "Inicio":
             st.markdown("""
             <div class="hero-section">
-                <div class="logo-container">
-                    <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Ait Paris</h2>
-                    <h3 style="color: #D2691E; margin: 0; font-size: 1.2rem;">DELICAFÉ</h3>
-                </div>
-                <h3 style="margin: 1rem 0 0 0; font-style: italic;">Donde el café se encuentra con el arte</h3>
+                <h3 style="margin: 0; font-style: italic;">Donde el café se encuentra con el arte</h3>
             </div>
             """, unsafe_allow_html=True)
+            
+            mostrar_logo()
             
             # Tarjeta de puntos
             st.markdown(f"""
@@ -307,31 +437,41 @@ if st.session_state.user:
             </div>
             """, unsafe_allow_html=True)
             
-            # Bienvenida personal
-            st.success(f"✨ ¡Bienvenido/a {perfil['nombre']}!")
+            # Verificar cumpleaños
+            fecha_cumpleanos = perfil.get('fecha_cumpleanos')
+            if fecha_cumpleanos and es_cumpleanos_hoy(fecha_cumpleanos):
+                st.markdown(f"""
+                <div class="birthday-card">
+                    <h3>🎉 ¡Feliz Cumpleaños!</h3>
+                    <p>¡Hoy es tu día especial! Disfruta de regalos exclusivos</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Imagen principal local
+            st.subheader("☕ Nuestra Esencia")
+            cargar_imagen_local(CONFIG_IMAGENES["hero"], "🎨 Donde el café se encuentra con el arte")
             
             # Acciones rápidas
+            st.subheader("🚀 Acciones Rápidas")
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("📥 Registrar Compra", use_container_width=True):
-                    st.info("Ve a la pestaña 'Perfil' para registrar compras")
+                    st.info("📍 Ve a 'Perfil' para registrar tus compras")
             with col2:
-                if st.button("🎁 Ver Productos", use_container_width=True):
-                    st.experimental_set_query_params(tab="Productos")
-                    st.rerun()
+                if st.button("🎁 Canjear Puntos", use_container_width=True):
+                    st.info("📍 Ve a 'Productos' para canjear tus puntos")
             
             # Productos destacados
-            st.subheader("🛍️ Productos Destacados")
+            st.subheader("🌟 Destacados")
             for producto in PRODUCTOS[:2]:
                 with st.container():
                     st.markdown(f"""
                     <div class="mobile-card">
-                        <img src="{producto['imagen']}" width="100%" style="border-radius: 10px;">
                         <h4>{producto['nombre']}</h4>
                         <p>⭐ {producto['puntos']} puntos</p>
-                        <p><small>${producto['precio_original']} valor</small></p>
                     </div>
                     """, unsafe_allow_html=True)
+                    cargar_imagen_local(producto['imagen'])
         
         # PÁGINA DE PRODUCTOS
         elif selected == "Productos":
@@ -342,23 +482,43 @@ if st.session_state.user:
             </div>
             """, unsafe_allow_html=True)
             
+            # Ofertas de cumpleaños
+            fecha_cumpleanos = perfil.get('fecha_cumpleanos')
+            if fecha_cumpleanos and es_cumpleanos_hoy(fecha_cumpleanos):
+                st.markdown(f"""
+                <div class="birthday-card">
+                    <h3>🎁 ¡Regalo de Cumpleaños!</h3>
+                    <p>Café especial + Dulce sorpresa</p>
+                    <h4>¡GRATIS hoy!</h4>
+                </div>
+                """, unsafe_allow_html=True)
+                cargar_imagen_local(OFERTAS_ESPECIALES[0]['imagen'])
+                if st.button("🎁 Reclamar Mi Regalo", use_container_width=True):
+                    st.success("¡Regalo reclamado! Muestra esta pantalla en tienda")
+            
+            # Todos los productos
+            st.subheader("☕ Nuestra Carta")
             for producto in PRODUCTOS:
                 with st.container():
                     disponible = puntos_usuario >= producto['puntos']
                     st.markdown(f"""
-                    <div class="mobile-card" style="opacity: {'1' if disponible else '0.7'};">
-                        <img src="{producto['imagen']}" width="100%" style="border-radius: 10px;">
+                    <div class="mobile-card" style="opacity: {'1' if disponible else '0.7'}">
                         <h4>{producto['nombre']}</h4>
                         <p>⭐ {producto['puntos']} puntos</p>
+                        <p><small>Valor: ${producto['precio_original']}</small></p>
                         {"✅ DISPONIBLE" if disponible else f"❌ Te faltan {producto['puntos'] - puntos_usuario} puntos"}
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    if disponible and st.button(f"Canjear {producto['puntos']} pts", key=f"canjear_{producto['nombre']}", use_container_width=True):
+                    cargar_imagen_local(producto['imagen'])
+                    
+                    if disponible and st.button(f"Canjear {producto['puntos']} pts", 
+                                              key=f"canjear_{producto['nombre']}", 
+                                              use_container_width=True):
                         nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
                         if nuevos_puntos >= 0:
                             st.success(f"¡Canjeado! {producto['nombre']}")
-                            st.session_state.profile = None  # Forzar recarga
+                            st.session_state.profile = None
                             time.sleep(2)
                             st.rerun()
         
@@ -376,27 +536,31 @@ if st.session_state.user:
             <div class="mobile-card">
                 <h4>👋 Hola, {perfil['nombre']}</h4>
                 <p>📧 {perfil['email']}</p>
-                <p>⭐ {puntos_usuario} puntos</p>
+                <p>⭐ {puntos_usuario} puntos acumulados</p>
                 <p>💰 ${perfil.get('total_compras', 0):.2f} gastados</p>
-                <p>🎫 {perfil.get('tickets_registrados', 0)} tickets</p>
+                <p>🎫 {perfil.get('tickets_registrados', 0)} tickets registrados</p>
+                <p>{"🎂 " + perfil['fecha_cumpleanos'].strftime('%d/%m/%Y') if perfil.get('fecha_cumpleanos') else "🎂 Sin fecha de cumpleaños"}</p>
             </div>
             """, unsafe_allow_html=True)
             
             # Registrar compra
-            st.subheader("📥 Registrar Compra")
+            st.subheader("📥 Registrar Nueva Compra")
             with st.form("compra_form"):
-                numero_ticket = st.text_input("Número de Ticket")
-                monto_compra = st.number_input("Monto ($)", min_value=0.0, step=0.5)
+                numero_ticket = st.text_input("Número de Ticket", placeholder="TKT-001")
+                monto_compra = st.number_input("Monto de la Compra ($)", min_value=0.0, step=0.5, value=0.0)
                 
-                if st.form_submit_button("Registrar Compra", use_container_width=True):
-                    if numero_ticket and monto_compra > 0:
-                        # Simular registro de compra
-                        nuevos_puntos = update_points_via_rest(uid, int(monto_compra))
-                        if nuevos_puntos > puntos_usuario:
-                            st.success(f"¡Compra registrada! +{int(monto_compra)} puntos")
-                            st.session_state.profile = None  # Forzar recarga
+                if st.form_submit_button("📥 Registrar Compra y Ganar Puntos", use_container_width=True):
+                    if numero_ticket.strip() and monto_compra > 0:
+                        puntos_ganados = registrar_ticket_compra(uid, monto_compra, numero_ticket)
+                        if puntos_ganados > 0:
+                            st.success(f"✅ ¡Compra registrada! Ganaste {puntos_ganados} puntos")
+                            st.session_state.profile = None
                             time.sleep(2)
                             st.rerun()
+                        else:
+                            st.error("❌ Error al registrar la compra")
+                    else:
+                        st.warning("⚠️ Ingresa un número de ticket y monto válidos")
             
             # Cerrar sesión
             st.markdown("---")
@@ -404,67 +568,108 @@ if st.session_state.user:
                 st.session_state.user = None
                 st.session_state.profile = None
                 st.rerun()
-    
-    else:
-        st.error("❌ No se pudo cargar el perfil. Por favor, recarga la página.")
-        if st.button("🔄 Recargar"):
-            st.session_state.profile = None
-            st.rerun()
 
 # ==================================================
-# INTERFAZ DE LOGIN (NO LOGUEADO)
+# INTERFAZ DE LOGIN - NO LOGUEADO
 # ==================================================
 else:
+    # Hero Section
     st.markdown("""
     <div class="hero-section">
-        <div class="logo-container">
-            <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Ait Paris</h2>
-            <h3 style="color: #D2691E; margin: 0; font-size: 1.2rem;">DELICAFÉ</h3>
-        </div>
-        <h3 style="margin: 1rem 0 0 0; font-style: italic;">Donde el café se encuentra con el arte</h3>
+        <h3 style="margin: 0; font-style: italic;">Bienvenido a Ait Paris Delicafé</h3>
     </div>
     """, unsafe_allow_html=True)
     
-    st.image("https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400", 
-             caption="🎨 Cada taza es una experiencia artística")
+    # Logo
+    mostrar_logo()
     
+    # Imagen principal local
+    cargar_imagen_local(CONFIG_IMAGENES["hero"], "🎨 Donde el café se encuentra con el arte")
+    
+    # Tabs de login/registro
     tab1, tab2 = st.tabs(["🚀 Ingresar", "📝 Crear Cuenta"])
     
     with tab1:
         st.subheader("Bienvenido de vuelta")
         with st.form("login_form"):
-            email = st.text_input("📧 Email")
-            password = st.text_input("🔒 Contraseña", type="password")
+            email = st.text_input("📧 Email", placeholder="tu@email.com")
+            password = st.text_input("🔒 Contraseña", type="password", placeholder="Tu contraseña")
             
-            if st.form_submit_button("🎯 Ingresar", use_container_width=True):
+            if st.form_submit_button("🎯 Ingresar a Mi Cuenta", use_container_width=True):
                 if email and password:
                     try:
                         user_info = login_user(email, password)
                         st.session_state.user = user_info
-                        st.success("¡Bienvenido!")
+                        st.success("¡Bienvenido de vuelta!")
                         time.sleep(1)
                         st.rerun()
                     except Exception as e:
                         st.error(f"Error: {e}")
+                else:
+                    st.warning("Por favor completa todos los campos")
     
     with tab2:
-        st.subheader("Únete a Nosotros")
+        st.subheader("Únete a la Familia Delicafé")
+        st.info("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")
+        
         with st.form("registro_form"):
-            nombre = st.text_input("👤 Nombre completo")
-            email = st.text_input("📧 Email")
-            password = st.text_input("🔒 Contraseña", type="password")
-            fecha_cumpleanos = st.date_input("🎂 Fecha de Cumpleaños (opcional)")
+            nombre = st.text_input("👤 Nombre completo", placeholder="Tu nombre completo")
+            email = st.text_input("📧 Email", placeholder="tu@email.com")
+            password = st.text_input("🔒 Contraseña", type="password", placeholder="Crea una contraseña")
+            fecha_cumpleanos = st.date_input(
+                "🎂 Fecha de Cumpleaños (opcional)",
+                value=None,
+                min_value=date(1900, 1, 1),
+                max_value=date.today(),
+                help="¡Recibe regalos especiales en tu cumpleaños!"
+            )
             
-            if st.form_submit_button("🎨 Registrarse", use_container_width=True):
+            if st.form_submit_button("🎨 Unirme a Delicafé", use_container_width=True):
                 if nombre and email and password:
                     try:
                         user_info = signup_user(email, password, nombre, fecha_cumpleanos)
                         st.session_state.user = user_info
-                        st.success("¡Cuenta creada! 10 puntos de regalo")
-                        time.sleep(2)
+                        st.balloons()
+                        st.success("""
+                        🎉 ¡Bienvenido a nuestra familia Delicafé!
+                        
+                        **🎁 Recibiste 10 puntos de bienvenida**
+                        
+                        Ahora puedes:
+                        - Canjear puntos por experiencias únicas
+                        - Acceder a ofertas exclusivas  
+                        - Recibir regalos en tu cumpleaños
+                        """)
+                        time.sleep(3)
                         st.rerun()
                     except Exception as e:
                         st.error(f"Error: {e}")
+                else:
+                    st.warning("Por favor completa los campos obligatorios")
+    
+    # Beneficios
+    st.markdown("---")
+    st.subheader("⭐ Beneficios Exclusivos")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div class="benefit-item">
+            <span>☕ 5 puntos por cada $5</span>
+        </div>
+        <div class="benefit-item">
+            <span>🎁 Regalos cumpleaños</span>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="benefit-item">
+            <span>⭐ Ofertas exclusivas</span>
+        </div>
+        <div class="benefit-item">
+            <span>👑 Trato preferencial</span>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ==================================================
 # FOOTER
