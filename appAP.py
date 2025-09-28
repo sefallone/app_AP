@@ -543,7 +543,7 @@ if st.session_state.user:
                             st.error("❌ Error al procesar el canje")
         
         # SECCIÓN: ESTADÍSTICAS - MODIFICAR TÍTULO/TEXTO
-        st.subheader("📊 Tu Trayectoria Artística")  <!-- MODIFICAR título -->
+        st.subheader("📊 Tu Trayectoria Artística")  
         
         # VALIDACIÓN CAMPOS NUMÉRICOS - NO MODIFICAR
         try:
@@ -558,9 +558,9 @@ if st.session_state.user:
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("💰 Total Gastado", f"${total_compras:.2f}")  <!-- MODIFICAR texto -->
+            st.metric("💰 Total Gastado", f"${total_compras:.2f}")  
         with col2:
-            st.metric("🎫 Tickets Registrados", tickets_registrados)  <!-- MODIFICAR texto -->
+            st.metric("🎫 Tickets Registrados", tickets_registrados)  
         with col3:
             # SISTEMA DE NIVELES - MODIFICAR CRITERIOS/TEXTOS
             if puntos_usuario < 50:
@@ -571,49 +571,49 @@ if st.session_state.user:
                 nivel = "👑 Maestro"
             else:
                 nivel = "💎 Leyenda"
-            st.metric("👑 Nivel Actual", nivel)  <!-- MODIFICAR texto -->
+            st.metric("👑 Nivel Actual", nivel)  
         
         # SECCIÓN: GESTIÓN DE PUNTOS - MODIFICAR TÍTULO/TEXTO
-        st.subheader("🎯 Sigue Sumando Puntos")  <!-- MODIFICAR título -->
+        st.subheader("🎯 Sigue Sumando Puntos")  
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("🎁 Registrar Nueva Compra", use_container_width=True):  <!-- MODIFICAR texto -->
+            if st.button("🎁 Registrar Nueva Compra", use_container_width=True):  
                 with st.form("nueva_compra_form"):
-                    st.write("**📝 Registrar Nueva Compra**")  <!-- MODIFICAR texto -->
-                    numero_ticket = st.text_input("Número de Ticket", placeholder="TKT-001")  <!-- MODIFICAR texto -->
-                    monto_compra = st.number_input("Monto de la Compra ($)", min_value=0.0, step=0.5, value=0.0)  <!-- MODIFICAR texto -->
+                    st.write("**📝 Registrar Nueva Compra**")  
+                    numero_ticket = st.text_input("Número de Ticket", placeholder="TKT-001")  
+                    monto_compra = st.number_input("Monto de la Compra ($)", min_value=0.0, step=0.5, value=0.0)  
                     
-                    if st.form_submit_button("📥 Registrar Compra"):  <!-- MODIFICAR texto -->
+                    if st.form_submit_button("📥 Registrar Compra"):  
                         if numero_ticket.strip() and monto_compra > 0:
                             puntos_ganados = registrar_ticket_compra(uid, monto_compra, numero_ticket)
                             if puntos_ganados > 0:
-                                st.success(f"✅ ¡Compra registrada! Ganaste {puntos_ganados} puntos")  <!-- MODIFICAR texto -->
+                                st.success(f"✅ ¡Compra registrada! Ganaste {puntos_ganados} puntos") 
                                 time.sleep(2)
                                 st.rerun()
                             else:
                                 st.error("❌ Error al registrar la compra")
                         else:
-                            st.warning("⚠️ Ingresa un número de ticket y monto válidos")  <!-- MODIFICAR texto -->
+                            st.warning("⚠️ Ingresa un número de ticket y monto válidos")  
         
         with col2:
-            if st.button("✨ +5 Puntos de Cortesía", use_container_width=True):  <!-- MODIFICAR texto -->
+            if st.button("✨ +5 Puntos de Cortesía", use_container_width=True):  
                 nuevos_puntos = update_points_via_rest(uid, 5)
                 if nuevos_puntos > puntos_usuario:
-                    st.success(f"🎉 ¡+5 puntos de cortesía! Ahora tienes {nuevos_puntos} puntos")  <!-- MODIFICAR texto -->
+                    st.success(f"🎉 ¡+5 puntos de cortesía! Ahora tienes {nuevos_puntos} puntos")  
                     time.sleep(2)
                     st.rerun()
                 else:
                     st.error("❌ Error al agregar puntos")
     
     else:
-        st.error("❌ No se pudo cargar tu perfil. Por favor, recarga la página.")  <!-- MODIFICAR texto -->
+        st.error("❌ No se pudo cargar tu perfil. Por favor, recarga la página.")  
         
-        if st.button("🔄 Recargar Perfil"):  <!-- MODIFICAR texto -->
+        if st.button("🔄 Recargar Perfil"):  
             st.rerun()
     
     st.markdown("---")
-    if st.button("🚪 Cerrar Sesión"):  <!-- MODIFICAR texto -->
+    if st.button("🚪 Cerrar Sesión"):  
         st.session_state.user = None
         st.rerun()
 
@@ -626,38 +626,38 @@ else:
     with col1:
         st.markdown("""
         <div class="login-container">
-            <h2 style="text-align: center; color: #764ba2;">🎨 Únete a Nuestra Galería</h2>  <!-- MODIFICAR texto -->
-            <p style="text-align: center;">✨ <strong>¡Sé nuestro artista preferido!</strong></p>  <!-- MODIFICAR texto -->
+            <h2 style="text-align: center; color: #764ba2;">🎨 Únete a Nuestra Galería</h2>  
+            <p style="text-align: center;">✨ <strong>¡Sé nuestro artista preferido!</strong></p>  
         """, unsafe_allow_html=True)
         
-        tab1, tab2 = st.tabs(["🚀 Ingresar", "📝 Crear Cuenta"])  <!-- MODIFICAR textos -->
+        tab1, tab2 = st.tabs(["🚀 Ingresar", "📝 Crear Cuenta"])  
         
         with tab1:
-            st.info("¿Ya eres parte de nuestra comunidad artística?")  <!-- MODIFICAR texto -->
+            st.info("¿Ya eres parte de nuestra comunidad artística?")  
             with st.form("login_form"):
-                email = st.text_input("📧 Email", placeholder="tu@email.com")  <!-- MODIFICAR texto -->
-                password = st.text_input("🔒 Contraseña", type="password")  <!-- MODIFICAR texto -->
+                email = st.text_input("📧 Email", placeholder="tu@email.com")  
+                password = st.text_input("🔒 Contraseña", type="password")  
                 
-                if st.form_submit_button("🎯 Ingresar a Mi Galería"):  <!-- MODIFICAR texto -->
+                if st.form_submit_button("🎯 Ingresar a Mi Galería"):  
                     if email and password:
                         try:
                             user_info = login_user(email, password)
                             st.session_state.user = user_info
-                            st.success("✅ ¡Bienvenido a tu espacio creativo!")  <!-- MODIFICAR texto -->
+                            st.success("✅ ¡Bienvenido a tu espacio creativo!")  
                             st.rerun()
                         except Exception as e:
                             st.error(f"❌ {e}")
                     else:
-                        st.warning("⚠️ Completa todos los campos")  <!-- MODIFICAR texto -->
+                        st.warning("⚠️ Completa todos los campos")  
         
         with tab2:
-            st.success("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")  <!-- MODIFICAR texto -->
+            st.success("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")  
             with st.form("registro_form"):
-                nombre = st.text_input("👤 Nombre completo", placeholder="Claude Monet")  <!-- MODIFICAR texto -->
-                email = st.text_input("📧 Email", placeholder="claude@arteparis.com")  <!-- MODIFICAR texto -->
-                password = st.text_input("🔒 Contraseña", type="password")  <!-- MODIFICAR texto -->
+                nombre = st.text_input("👤 Nombre completo", placeholder="Claude Monet")  
+                email = st.text_input("📧 Email", placeholder="claude@arteparis.com")  
+                password = st.text_input("🔒 Contraseña", type="password")  
                 
-                if st.form_submit_button("🎨 Unirme al Arte París Club"):  <!-- MODIFICAR texto -->
+                if st.form_submit_button("🎨 Unirme al Arte París Club"):  
                     if nombre and email and password:
                         try:
                             user_info = signup_user(email, password, nombre)
@@ -677,25 +677,25 @@ else:
                         except Exception as e:
                             st.error(f"❌ {e}")
                     else:
-                        st.warning("⚠️ Completa todos los campos")  <!-- MODIFICAR texto -->
+                        st.warning("⚠️ Completa todos los campos")  
         
         st.markdown("</div>", unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
         <div style="padding: 2rem;">
-            <h3>🎪 Beneficios Exclusivos</h3>  <!-- MODIFICAR título -->
+            <h3>🎪 Beneficios Exclusivos</h3>  
             <div class="product-card">
-                <h4>⭐ Puntos por cada compra</h4>  <!-- MODIFICAR texto -->
-                <p>5 puntos por cada $5 gastados</p>  <!-- MODIFICAR texto -->
+                <h4>⭐ Puntos por cada compra</h4>  
+                <p>5 puntos por cada $5 gastados</p>  
             </div>
             <div class="product-card">
-                <h4>🎨 Ofertas de Arte</h4>  <!-- MODIFICAR texto -->
-                <p>Productos exclusivos inspirados en obras maestras</p>  <!-- MODIFICAR texto -->
+                <h4>🎨 Ofertas de Arte</h4>  
+                <p>Productos exclusivos inspirados en obras maestras</p>  
             </div>
             <div class="product-card">
-                <h4>👑 Trato Preferencial</h4>  <!-- MODIFICAR texto -->
-                <p>Descuentos y promociones especiales</p>  <!-- MODIFICAR texto -->
+                <h4>👑 Trato Preferencial</h4>  
+                <p>Descuentos y promociones especiales</p>  
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -707,8 +707,8 @@ st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 2rem;">
     <h3>🎨 Arte París</h3>  <!-- MODIFICAR nombre -->
-    <p><em>"Donde la pastelería se encuentra con el arte"</em></p>  <!-- MODIFICAR eslogan -->
-    <p>✨ <strong>¡Sé nuestro artista preferido!</strong> ✨</p>  <!-- MODIFICAR frase -->
-    <p>📍 Cada bocado es una experiencia francesa inolvidable</p>  <!-- MODIFICAR texto -->
+    <p><em>"Donde la pastelería se encuentra con el arte"</em></p>  
+    <p>✨ <strong>¡Sé nuestro artista preferido!</strong> ✨</p>  
+    <p>📍 Cada bocado es una experiencia francesa inolvidable</p>  
 </div>
 """, unsafe_allow_html=True)
