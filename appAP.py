@@ -672,7 +672,7 @@ else:
                             - Canjear puntos por obras maestras dulces
                             - Acceder a ofertas exclusivas
                             - Participar en eventos especiales
-                            """)  <!-- MODIFICAR texto -->
+                            """)  
                             st.rerun()
                         except Exception as e:
                             st.error(f"❌ {e}")
@@ -706,7 +706,7 @@ else:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 2rem;">
-    <h3>🎨 Arte París</h3>  <!-- MODIFICAR nombre -->
+    <h3>🎨 Arte París</h3>  
     <p><em>"Donde la pastelería se encuentra con el arte"</em></p>  
     <p>✨ <strong>¡Sé nuestro artista preferido!</strong> ✨</p>  
     <p>📍 Cada bocado es una experiencia francesa inolvidable</p>  
