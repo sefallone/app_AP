@@ -26,11 +26,11 @@ CONFIG_IMAGENES = {
     "logo": "LogoAP.jpg",           # Tu logo principal
     "hero": "Cafe1.jpg",       # Imagen hero principal
     "productos": {
-        "macarons": "Milhojas.jpg",
-        "eclair": "Brazo.jpg",
+        "Milhojas": "Milhojas.jpg",
+        "brazo": "Brazo.jpg",
         "croissant": "Croissant.jpg",
-        "cafe_especial": "Cafe.jpg",
-        "tarta_frambuesa": "Profiterol.jpg"
+        "cafe_especial": "Cafe1.jpg",
+        "profiterol": "Profiterol.jpg"
     },
     "ofertas": {
         "cumpleanos": "Brazo.jpg",
@@ -43,38 +43,38 @@ CONFIG_IMAGENES = {
 # ==================================================
 PRODUCTOS = [
     {
-        "nombre": "Caja de Macarons Surpresa",
+        "nombre": "Milhojas",
+        "puntos": 100,
+        "precio_original": 4.00,
+        "imagen": CONFIG_IMAGENES["productos"]["Milhojas"],
+        "categoria": "clasico"
+    },
+    {
+        "nombre": "Brazo Gitano",
+        "puntos": 80,
+        "precio_original": 3.00,
+        "imagen": CONFIG_IMAGENES["productos"]["brazo"],
+        "categoria": "clasico"
+    },
+    {
+        "nombre": "Croissant Dulce",
         "puntos": 50,
-        "precio_original": 25.00,
-        "imagen": CONFIG_IMAGENES["productos"]["macarons"],
-        "categoria": "clasico"
-    },
-    {
-        "nombre": "Éclair de Temporada",
-        "puntos": 30,
-        "precio_original": 12.00,
-        "imagen": CONFIG_IMAGENES["productos"]["eclair"],
-        "categoria": "clasico"
-    },
-    {
-        "nombre": "Croissant Artístico",
-        "puntos": 25,
-        "precio_original": 8.00,
+        "precio_original": 2.50,
         "imagen": CONFIG_IMAGENES["productos"]["croissant"],
         "categoria": "panaderia"
     },
     {
         "nombre": "Café Especial Arte París",
-        "puntos": 15,
-        "precio_original": 5.00,
+        "puntos": 100,
+        "precio_original": 4.00,
         "imagen": CONFIG_IMAGENES["productos"]["cafe_especial"],
         "categoria": "bebida"
     },
     {
-        "nombre": "Tarta de Frambuesa",
+        "nombre": "Profiterol",
         "puntos": 80,
         "precio_original": 35.00,
-        "imagen": CONFIG_IMAGENES["productos"]["tarta_frambuesa"],
+        "imagen": CONFIG_IMAGENES["productos"]["profiterol"],
         "categoria": "especial"
     }
 ]
@@ -93,8 +93,8 @@ OFERTAS_ESPECIALES = [
     },
     {
         "titulo": "☕ Combo Mañana Francesa",
-        "descripcion": "Café + Croissant + Macaron",
-        "puntos": 65,
+        "descripcion": "Café + Tartaleta Fresas",
+        "puntos": 150,
         "imagen": CONFIG_IMAGENES["ofertas"]["combo"],
         "exclusivo": True
     }
@@ -103,7 +103,7 @@ OFERTAS_ESPECIALES = [
 # ==================================================
 # FUNCIONES PARA MANEJO DE IMÁGENES LOCALES
 # ==================================================
-def cargar_imagen_local(ruta_imagen, ancho_maximo=300):  # Reducido de 400 a 300
+def cargar_imagen_local(ruta_imagen, ancho_maximo=400):  # Reducido de 400 a 300
     """
     Carga una imagen local y la muestra en Streamlit
     Si no encuentra la imagen, muestra un placeholder
@@ -143,14 +143,14 @@ def mostrar_logo():
         logo = Image.open(CONFIG_IMAGENES["logo"])
         # Logo más pequeño - 200px de ancho máximo
         ancho_original, alto_original = logo.size
-        if ancho_original > 200:
-            ratio = 200 / ancho_original
+        if ancho_original > 350:
+            ratio = 350 / ancho_original
             nuevo_alto = int(alto_original * ratio)
-            logo = logo.resize((200, nuevo_alto), Image.Resampling.LANCZOS)
+            logo = logo.resize((350, nuevo_alto), Image.Resampling.LANCZOS)
         st.image(logo, use_container_width=False)
     else:
         st.markdown("""
-        <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Ait Paris</h2>
+        <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Arte París</h2>
         <h3 style="color: #D2691E; margin: 0; font-size: 1.2rem;">ARTE PARÍS</h3>
         """, unsafe_allow_html=True)
     
