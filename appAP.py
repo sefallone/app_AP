@@ -103,7 +103,7 @@ OFERTAS_ESPECIALES = [
 # ==================================================
 # FUNCIONES PARA MANEJO DE IMÁGENES LOCALES
 # ==================================================
-def cargar_imagen_local(ruta_imagen, ancho_maximo=400):
+def cargar_imagen_local(ruta_imagen, ancho_maximo=300):  # Reducido de 400 a 300
     """
     Carga una imagen local y la muestra en Streamlit
     Si no encuentra la imagen, muestra un placeholder
@@ -111,13 +111,21 @@ def cargar_imagen_local(ruta_imagen, ancho_maximo=400):
     try:
         if os.path.exists(ruta_imagen):
             imagen = Image.open(ruta_imagen)
-            st.image(imagen, use_container_width =True)
+            
+            # Redimensionar manteniendo proporción
+            ancho_original, alto_original = imagen.size
+            if ancho_original > ancho_maximo:
+                ratio = ancho_maximo / ancho_original
+                nuevo_alto = int(alto_original * ratio)
+                imagen = imagen.resize((ancho_maximo, nuevo_alto), Image.Resampling.LANCZOS)
+            
+            st.image(imagen, use_container_width=False)  # Cambiado a False
             return True
         else:
             st.error(f"❌ No se encontró: {ruta_imagen}")
-            # Placeholder genérico
-            st.image("https://via.placeholder.com/300x200/8B4513/FFFFFF?text=Imagen+No+Encontrada", 
-                    use_container_width =True)
+            # Placeholder más pequeño
+            st.image("https://via.placeholder.com/200x150/8B4513/FFFFFF?text=Imagen+No+Encontrada", 
+                    use_container_width=False)
             return False
     except Exception as e:
         st.error(f"❌ Error cargando imagen: {e}")
@@ -128,12 +136,18 @@ def mostrar_logo():
     Muestra el logo de la empresa
     """
     st.markdown("""
-    <div style="text-align: center; background: white; padding: 1rem; border-radius: 15px; margin: 1rem 0;">
+    <div style="text-align: center; background: white; padding: 0.5rem; border-radius: 15px; margin: 0.5rem 0;">
     """, unsafe_allow_html=True)
     
     if os.path.exists(CONFIG_IMAGENES["logo"]):
         logo = Image.open(CONFIG_IMAGENES["logo"])
-        st.image(logo, use_container_width=True)
+        # Logo más pequeño - 200px de ancho máximo
+        ancho_original, alto_original = logo.size
+        if ancho_original > 200:
+            ratio = 200 / ancho_original
+            nuevo_alto = int(alto_original * ratio)
+            logo = logo.resize((200, nuevo_alto), Image.Resampling.LANCZOS)
+        st.image(logo, use_container_width=False)
     else:
         st.markdown("""
         <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Ait Paris</h2>
@@ -167,7 +181,7 @@ def login_user(email, password):
     except Exception as e:
         raise Exception(f"Error en login: {str(e)}")
 
-def signup_user(email, password, nombre, fecha_cumpleanos=None):
+def signup_user(email, password, nombre, fecha_cumpleanos=None, acepta_terminos=False, acepta_marketing=False):
     """Registro de usuario"""
     try:
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_CONFIG['API_KEY']}"
@@ -184,7 +198,7 @@ def signup_user(email, password, nombre, fecha_cumpleanos=None):
         if response.status_code == 200:
             st.success("✅ Usuario registrado")
             time.sleep(1)
-            save_profile_via_rest(result['localId'], nombre, email, fecha_cumpleanos, 10)
+            save_profile_via_rest(result['localId'], nombre, email, fecha_cumpleanos, 10, acepta_terminos, acepta_marketing)
             return result
         else:
             error_msg = result.get('error', {}).get('message', 'Error desconocido')
@@ -192,7 +206,7 @@ def signup_user(email, password, nombre, fecha_cumpleanos=None):
     except Exception as e:
         raise Exception(f"Error en registro: {str(e)}")
 
-def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_points=0):
+def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_points=0, acepta_terminos=False, acepta_marketing=False):
     """Guardar perfil en Firestore"""
     try:
         url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
@@ -204,7 +218,9 @@ def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_point
                 "puntos": {"integerValue": bonus_points},
                 "timestamp": {"timestampValue": datetime.utcnow().isoformat() + "Z"},
                 "total_compras": {"doubleValue": 0.0},
-                "tickets_registrados": {"integerValue": 0}
+                "tickets_registrados": {"integerValue": 0},
+                "acepta_terminos": {"booleanValue": acepta_terminos},
+                "acepta_marketing": {"booleanValue": acepta_marketing}
             }
         }
         
@@ -232,7 +248,9 @@ def get_profile_via_rest(uid):
                     'email': data['fields'].get('email', {}).get('stringValue', ''),
                     'puntos': int(data['fields'].get('puntos', {}).get('integerValue', 0)),
                     'total_compras': float(data['fields'].get('total_compras', {}).get('doubleValue', 0.0)),
-                    'tickets_registrados': int(data['fields'].get('tickets_registrados', {}).get('integerValue', 0))
+                    'tickets_registrados': int(data['fields'].get('tickets_registrados', {}).get('integerValue', 0)),
+                    'acepta_terminos': data['fields'].get('acepta_terminos', {}).get('booleanValue', False),
+                    'acepta_marketing': data['fields'].get('acepta_marketing', {}).get('booleanValue', False)
                 }
                 
                 if 'fecha_cumpleanos' in data['fields']:
@@ -373,6 +391,21 @@ st.markdown("""
         border-radius: 10px;
         border-left: 4px solid #135454;
     }
+    .terms-section {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 4px solid #46E0E0;
+        margin: 1rem 0;
+        font-size: 0.85rem;
+    }
+    .checkbox-container {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        margin: 0.5rem 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -449,7 +482,7 @@ if st.session_state.user:
             
             # Imagen principal local
             st.subheader("☕ Nuestra Esencia")
-            cargar_imagen_local(CONFIG_IMAGENES["hero"], "🎨 Donde el café es arte")
+            cargar_imagen_local(CONFIG_IMAGENES["hero"])
             
             # Acciones rápidas
             st.subheader("🚀 Acciones Rápidas")
@@ -471,7 +504,7 @@ if st.session_state.user:
                         <p>⭐ {producto['puntos']} puntos</p>
                     </div>
                     """, unsafe_allow_html=True)
-                    cargar_imagen_local(producto['imagen'])
+                    cargar_imagen_local(producto['imagen'], 250)
         
         # PÁGINA DE PRODUCTOS
         elif selected == "Productos":
@@ -492,7 +525,7 @@ if st.session_state.user:
                     <h4>¡GRATIS hoy!</h4>
                 </div>
                 """, unsafe_allow_html=True)
-                cargar_imagen_local(OFERTAS_ESPECIALES[0]['imagen'])
+                cargar_imagen_local(OFERTAS_ESPECIALES[0]['imagen'], 250)
                 if st.button("🎁 Reclamar Mi Regalo", use_container_width=True):
                     st.success("¡Regalo reclamado! Muestra esta pantalla en tienda")
             
@@ -510,7 +543,7 @@ if st.session_state.user:
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    cargar_imagen_local(producto['imagen'])
+                    cargar_imagen_local(producto['imagen'], 250)
                     
                     if disponible and st.button(f"Canjear {producto['puntos']} pts", 
                                               key=f"canjear_{producto['nombre']}", 
@@ -584,7 +617,7 @@ else:
     mostrar_logo()
     
     # Imagen principal local
-    cargar_imagen_local(CONFIG_IMAGENES["hero"], "🎨 Donde el café es arte")
+    cargar_imagen_local(CONFIG_IMAGENES["hero"], 350)
     
     # Tabs de login/registro
     tab1, tab2 = st.tabs(["🚀 Ingresar", "📝 Crear Cuenta"])
@@ -610,7 +643,7 @@ else:
     
     with tab2:
         st.subheader("Únete al Club Arte París")
-        st.markdown("Para conseguir puntos, que podrás canjear por comida y bebidas gratis,Podrás hacer pedidos con tu celular, recibirás una recompensa de cumpleaños y mucho más.")
+        st.markdown("Para conseguir puntos, que podrás canjear por comida y bebidas gratis, Podrás hacer pedidos con tu celular, recibirás una recompensa de cumpleaños y mucho más.")
         st.info("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")
         
         with st.form("registro_form"):
@@ -618,33 +651,74 @@ else:
             email = st.text_input("📧 Email", placeholder="tu@email.com")
             password = st.text_input("🔒 Contraseña", type="password", placeholder="Crea una contraseña")
             fecha_cumpleanos = st.date_input(
-                "🎂 Fecha de Cumpleaños (opcional) Añade tu cumpleaños para que podamos felicitarte y enviarte un vale de regalo tu cumpleaños.",
+                "🎂 Fecha de Cumpleaños (opcional) - Añade tu cumpleaños para que podamos felicitarte y enviarte un vale de regalo en tu cumpleaños.",
                 value=None,
                 min_value=date(1900, 1, 1),
                 max_value=date.today(),
                 help="¡Recibe regalos especiales en tu cumpleaños!"
             )
             
+            # SECCIÓN DE TÉRMINOS Y CONDICIONES (NUEVO)
+            st.markdown("---")
+            st.markdown("### 📧 Comunicaciones y Términos")
+            
+            # Checkbox para marketing
+            st.markdown('<div class="checkbox-container">', unsafe_allow_html=True)
+            acepta_marketing = st.checkbox(
+                "**Sí, quiero recibir información sobre ofertas exclusivas, anuncios y nuevos productos de Arte París, así como sobre los productos más adaptados a mi cuenta y mi actividad.**",
+                value=False
+            )
+            st.markdown("""
+            <div class="terms-section">
+                <small><strong>Mantente al tanto.</strong> El e-mail es una gran forma de estar al día de las ofertas y novedades de Arte París, incluido el acceso anticipado a nuestros últimos lanzamientos de bebidas.</small><br><br>
+                <small>Puedes anular tu suscripción en cualquier momento. Por favor, consulta nuestra Declaración de privacidad o Contacta con nosotros.</small>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Checkbox para términos y condiciones
+            st.markdown('<div class="checkbox-container">', unsafe_allow_html=True)
+            acepta_terminos = st.checkbox(
+                "**Acepto las Condiciones de Uso y la Declaración de Privacidad**",
+                value=False
+            )
+            
+            # Enlaces a términos
+            st.markdown("""
+            <div style="text-align: center; margin-top: 0.5rem;">
+                <small>
+                    <a href="#" style="color: #46E0E0; text-decoration: none; margin: 0 0.5rem;">Condiciones de uso</a> • 
+                    <a href="#" style="color: #46E0E0; text-decoration: none; margin: 0 0.5rem;">Ayuda</a> • 
+                    <a href="#" style="color: #46E0E0; text-decoration: none; margin: 0 0.5rem;">Política de Privacidad</a> • 
+                    <a href="#" style="color: #46E0E0; text-decoration: none; margin: 0 0.5rem;">Términos y Condiciones</a>
+                </small>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            
             if st.form_submit_button("Unirme a Arte París", use_container_width=True):
                 if nombre and email and password:
-                    try:
-                        user_info = signup_user(email, password, nombre, fecha_cumpleanos)
-                        st.session_state.user = user_info
-                        st.balloons()
-                        st.success("""
-                        🎉 ¡Bienvenido al Club Arte París!
-                        
-                        **🎁 Recibiste 10 puntos de bienvenida**
-                        
-                        Ahora puedes:
-                        - Canjear puntos por experiencias únicas
-                        - Acceder a ofertas exclusivas  
-                        - Recibir regalos en tu cumpleaños
-                        """)
-                        time.sleep(3)
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error: {e}")
+                    if not acepta_terminos:
+                        st.error("❌ Debes aceptar las Condiciones de Uso y la Declaración de Privacidad para continuar.")
+                    else:
+                        try:
+                            user_info = signup_user(email, password, nombre, fecha_cumpleanos, acepta_terminos, acepta_marketing)
+                            st.session_state.user = user_info
+                            st.balloons()
+                            st.success("""
+                            🎉 ¡Bienvenido al Club Arte París!
+                            
+                            **🎁 Recibiste 10 puntos de bienvenida**
+                            
+                            Ahora puedes:
+                            - Canjear puntos por experiencias únicas
+                            - Acceder a ofertas exclusivas  
+                            - Recibir regalos en tu cumpleaños
+                            """)
+                            time.sleep(3)
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error: {e}")
                 else:
                     st.warning("Por favor completa los campos obligatorios")
     
