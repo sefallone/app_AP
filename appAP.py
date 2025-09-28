@@ -338,7 +338,7 @@ st.markdown("""
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
     .point-card-mobile {
-        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        background: linear-gradient(135deg, #46E0E0 0%, #46E0E0 100%);
         padding: 1.5rem;
         border-radius: 15px;
         margin: 1rem 0;
@@ -369,9 +369,9 @@ st.markdown("""
         align-items: center;
         margin: 0.5rem 0;
         padding: 0.5rem;
-        background: #F0FFFE;
+        background: #46E0E0;
         border-radius: 10px;
-        border-left: 4px solid #D2691E;
+        border-left: 4px solid #135454;
     }
 </style>
 """, unsafe_allow_html=True)
