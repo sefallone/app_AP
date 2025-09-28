@@ -394,13 +394,13 @@ st.subheader("🎭 Inspirado en la Belleza del Arte")
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.image("https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=200", caption="🎨 Monet - Inspiración Impresionista")  <!-- MODIFICAR imagen/texto -->
+    st.image("https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=200", caption="🎨 Monet - Inspiración Impresionista")  
 with col2:
-    st.image("https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=200", caption="📚 Cultura Francesa")  <!-- MODIFICAR imagen/texto -->
+    st.image("https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=200", caption="📚 Cultura Francesa")  
 with col3:
-    st.image("https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=200", caption="🎬 Cine de Arte")  <!-- MODIFICAR imagen/texto -->
+    st.image("https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=200", caption="🎬 Cine de Arte")  
 with col4:
-    st.image("https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=200", caption="🏛️ Arte Clásico")  <!-- MODIFICAR imagen/texto -->
+    st.image("https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=200", caption="🏛️ Arte Clásico")  
 
 st.markdown("---")
 
@@ -451,7 +451,7 @@ if st.session_state.user:
             """, unsafe_allow_html=True)
         
         # SECCIÓN: PRODUCTOS DISPONIBLES - MODIFICAR TÍTULO/TEXTO
-        st.subheader("🛍️ Galería de Delicias - Canjea tus Puntos")  <!-- MODIFICAR título -->
+        st.subheader("🛍️ Galería de Delicias - Canjea tus Puntos")  
         
         # FILTRADO DE PRODUCTOS - NO MODIFICAR LÓGICA
         productos_disponibles = []
@@ -469,7 +469,7 @@ if st.session_state.user:
         
         # MOSTRAR PRODUCTOS DISPONIBLES - MODIFICAR TEXTO/ESTILOS
         if productos_disponibles:
-            st.success(f"🎉 ¡Puedes canjear {len(productos_disponibles)} productos!")  <!-- MODIFICAR texto -->
+            st.success(f"🎉 ¡Puedes canjear {len(productos_disponibles)} productos!")  
             
             cols = st.columns(3)
             for idx, producto in enumerate(productos_disponibles):
@@ -482,7 +482,7 @@ if st.session_state.user:
                                 <div class="offer-badge">⭐ {producto['puntos']} pts</div>
                             </div>
                             <h4>{producto['nombre']}</h4>
-                            <p>💎 <s>${producto['precio_original']}</s> <strong>GRATIS con puntos</strong></p>  <!-- MODIFICAR texto -->
+                            <p>💎 <s>${producto['precio_original']}</s> <strong>GRATIS con puntos</strong></p>  
                         </div>
                         """, unsafe_allow_html=True)
                         
@@ -490,17 +490,17 @@ if st.session_state.user:
                             if puntos_usuario >= producto['puntos']:
                                 nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
                                 if nuevos_puntos >= 0:
-                                    st.success(f"🎨 ¡Felicidades! Has canjeado '{producto['nombre']}' por {producto['puntos']} puntos")  <!-- MODIFICAR texto -->
+                                    st.success(f"🎨 ¡Felicidades! Has canjeado '{producto['nombre']}' por {producto['puntos']} puntos")  
                                     st.balloons()
                                     time.sleep(2)
                                     st.rerun()
                                 else:
                                     st.error("❌ Error al procesar el canje")
         else:
-            st.info("💫 Aún no tienes suficientes puntos para canjear productos. ¡Sigue acumulando!")  <!-- MODIFICAR texto -->
+            st.info("💫 Aún no tienes suficientes puntos para canjear productos. ¡Sigue acumulando!")  
             
             # PRODUCTOS POR ALCANZAR - MODIFICAR TÍTULO/TEXTO
-            st.subheader("🎯 Productos por Alcanzar")  <!-- MODIFICAR título -->
+            st.subheader("🎯 Productos por Alcanzar")  
             cols = st.columns(3)
             for idx, producto in enumerate(productos_no_disponibles[:3]):
                 with cols[idx % 3]:
@@ -508,13 +508,13 @@ if st.session_state.user:
                     <div class="product-card" style="opacity: 0.7;">
                         <img src="{producto['imagen']}" width="100%" style="border-radius: 10px;">
                         <h4>{producto['nombre']}</h4>
-                        <p>⭐ Necesitas {producto['puntos']} puntos</p>  <!-- MODIFICAR texto -->
-                        <p><small>Te faltan: {producto['puntos'] - puntos_usuario} puntos</small></p>  <!-- MODIFICAR texto -->
+                        <p>⭐ Necesitas {producto['puntos']} puntos</p>  
+                        <p><small>Te faltan: {producto['puntos'] - puntos_usuario} puntos</small></p>  
                     </div>
                     """, unsafe_allow_html=True)
         
         # SECCIÓN: OFERTAS EXCLUSIVAS - MODIFICAR TÍTULO/TEXTO
-        st.subheader("🎪 Ofertas Exclusivas ArteParísClub")  <!-- MODIFICAR título -->
+        st.subheader("🎪 Ofertas Exclusivas ArteParísClub")  
         
         for oferta in OFERTAS_ESPECIALES:
             col1, col2 = st.columns([1, 2])
@@ -527,7 +527,7 @@ if st.session_state.user:
                     <h3>{oferta['titulo']}</h3>
                     <p>{oferta['descripcion']}</p>
                     <h4>💎 {oferta['puntos']} Puntos</h4>
-                    {"✅ DISPONIBLE" if disponible else "❌ Necesitas más puntos"}  <!-- MODIFICAR texto -->
+                    {"✅ DISPONIBLE" if disponible else "❌ Necesitas más puntos"}  
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -535,7 +535,7 @@ if st.session_state.user:
                     if st.button(f"🎪 Canjear Oferta Especial - {oferta['puntos']} puntos", key=f"oferta_{oferta['titulo']}"):
                         nuevos_puntos = update_points_via_rest(uid, -oferta['puntos'])
                         if nuevos_puntos >= 0:
-                            st.success(f"✨ ¡Obra maestra adquirida! {oferta['titulo']}")  <!-- MODIFICAR texto -->
+                            st.success(f"✨ ¡Obra maestra adquirida! {oferta['titulo']}")  
                             st.balloons()
                             time.sleep(2)
                             st.rerun()
