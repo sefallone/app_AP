@@ -23,7 +23,7 @@ FIREBASE_CONFIG = {
 # ==================================================
 # NOTA: Coloca estos archivos en la misma carpeta que tu script
 CONFIG_IMAGENES = {
-    "logo": "Logo nuevo.jpg",           # Tu logo principal
+    "logo": "LogoAP.jpg",           # Tu logo principal
     "hero": "Cafe1.jpg",       # Imagen hero principal
     "productos": {
         "macarons": "Milhojas.jpg",
@@ -34,7 +34,7 @@ CONFIG_IMAGENES = {
     },
     "ofertas": {
         "cumpleanos": "Brazo.jpg",
-        "combo": "Combo.jpg"
+        "combo": "Tartaletafresa1.jpg"
     }
 }
 
@@ -133,7 +133,7 @@ def mostrar_logo():
     
     if os.path.exists(CONFIG_IMAGENES["logo"]):
         logo = Image.open(CONFIG_IMAGENES["logo"])
-        st.image(logo, use_column_width=True)
+        st.image(logo, use_container_width=True)
     else:
         st.markdown("""
         <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Ait Paris</h2>
