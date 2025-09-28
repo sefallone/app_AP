@@ -1,77 +1,115 @@
 import streamlit as st
 
-# Configuración inicial
-st.set_page_config(
-    page_title="Arte París Café-Pastelería",
-    page_icon="🍰",
-    layout="wide"
+# --- CONFIGURACIÓN ---
+st.set_page_config(page_title="Arte París Café - Pastelería", page_icon="🍰", layout="wide")
+
+# --- ESTILOS CSS ---
+st.markdown(
+    """
+    <style>
+        body {
+            background-color: white;
+        }
+        .menu {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1rem;
+            background-color: #fff;
+            border-bottom: 2px solid #f0f0f0;
+            font-family: 'Arial', sans-serif;
+        }
+        .menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .menu a:hover {
+            color: #b5651d; /* color café */
+        }
+        .title {
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
 )
 
-# Menú principal
-menu = st.sidebar.radio(
-    "Navegación",
-    ["Productos", "ArteParísClub", "Delivery", "Nosotros"]
+# --- MENÚ SUPERIOR ---
+st.markdown(
+    """
+    <div class="menu">
+        <a href="?page=productos">Productos</a>
+        <a href="?page=club">ArteParísClub</a>
+        <a href="?page=delivery">Delivery</a>
+        <a href="?page=nosotros">Nosotros</a>
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
-# --- SECCIÓN PRODUCTOS ---
-if menu == "Productos":
-    st.title("🍰 Menú de Productos")
-    categoria = st.selectbox(
-        "Selecciona una categoría:",
-        ["Bollería", "Dulces Secos", "Pastelería Fría", "Restaurant"]
-    )
+# --- LÓGICA DE NAVEGACIÓN ---
+query_params = st.experimental_get_query_params()
+page = query_params.get("page", ["productos"])[0]
 
-    if categoria == "Bollería":
+# --- CONTENIDO ---
+if page == "productos":
+    st.markdown("<h1 class='title'>🍰 Menú de Productos</h1>", unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.image("https://images.unsplash.com/photo-1509440159598-05d26c92d3a1", use_container_width=True)
         st.subheader("🥐 Bollería")
-        st.write("Croissant, Napolitana de chocolate, Pan de queso...")
-    
-    elif categoria == "Dulces Secos":
+        st.write("Croissant, Napolitana, Pan de queso...")
+
+    with col2:
+        st.image("https://images.unsplash.com/photo-1606788075761-7a07aab8f207", use_container_width=True)
         st.subheader("🍪 Dulces Secos")
         st.write("Galletas, Alfajores, Brownies...")
 
-    elif categoria == "Pastelería Fría":
+    with col3:
+        st.image("https://images.unsplash.com/photo-1622495896520-3f5f6ad39e1d", use_container_width=True)
         st.subheader("🎂 Pastelería Fría")
         st.write("Cheesecake, Tiramisú, Tartaletas...")
 
-    elif categoria == "Restaurant":
+    with col4:
+        st.image("https://images.unsplash.com/photo-1529042410759-befb1204b468", use_container_width=True)
         st.subheader("🍴 Restaurant")
-        st.write("Sandwiches, Almuerzos ejecutivos, Ensaladas...")
+        st.write("Sandwiches, Almuerzos, Ensaladas...")
 
-# --- SECCIÓN CLUB ---
-elif menu == "ArteParísClub":
-    st.title("🎉 ArteParísClub")
-    opcion = st.radio("Selecciona una opción:", ["Registrarse", "Iniciar Sesión"])
+elif page == "club":
+    st.markdown("<h1 class='title'>🎉 ArteParísClub</h1>", unsafe_allow_html=True)
+    opcion = st.radio("Selecciona una opción:", ["Registrarse", "Iniciar Sesión"], horizontal=True)
 
     if opcion == "Registrarse":
-        st.subheader("Formulario de Registro")
         nombre = st.text_input("Nombre completo")
         email = st.text_input("Correo electrónico")
         password = st.text_input("Contraseña", type="password")
         if st.button("Registrarme"):
-            st.success(f"Usuario {nombre} registrado con éxito. ¡Bienvenido a ArteParísClub!")
+            st.success(f"Usuario {nombre} registrado con éxito 🎉")
 
     elif opcion == "Iniciar Sesión":
-        st.subheader("Inicia sesión en tu cuenta")
         email = st.text_input("Correo electrónico")
         password = st.text_input("Contraseña", type="password")
         if st.button("Ingresar"):
-            st.success("Inicio de sesión exitoso. ¡Ya puedes acumular puntos!")
+            st.success("Inicio de sesión exitoso ✅")
 
-# --- SECCIÓN DELIVERY ---
-elif menu == "Delivery":
-    st.title("🚚 Delivery Arte París")
+elif page == "delivery":
+    st.markdown("<h1 class='title'>🚚 Delivery</h1>", unsafe_allow_html=True)
+    st.image("https://images.unsplash.com/photo-1617196037302-9b845a1efb1b", use_container_width=True)
     st.write("""
     📦 **Cómo funciona nuestro delivery:**
-    1. Realiza tu pedido a través de la web o WhatsApp.
-    2. Elige si deseas recoger en tienda o recibir en tu domicilio.
-    3. Pago seguro por tarjeta o contra entrega.
-    4. Tiempo estimado de entrega: 30 - 45 minutos.
+    1. Haz tu pedido online o por WhatsApp.
+    2. Escoge recogida en tienda o envío a domicilio.
+    3. Paga con tarjeta o contra entrega.
+    4. Tiempo estimado: 30-45 minutos.
     """)
 
-# --- SECCIÓN NOSOTROS ---
-elif menu == "Nosotros":
-    st.title("👩‍🍳 Nosotros - Arte París")
-    opcion = st.radio("Explora:", ["Visión", "Misión", "Contacto", "Trabaja con nosotros"])
+elif page == "nosotros":
+    st.markdown("<h1 class='title'>👩‍🍳 Nosotros</h1>", unsafe_allow_html=True)
+    opcion = st.radio("Explora:", ["Visión", "Misión", "Contacto", "Trabaja con nosotros"], horizontal=True)
 
     if opcion == "Visión":
         st.subheader("🌟 Nuestra Visión")
@@ -94,4 +132,5 @@ elif menu == "Nosotros":
         cv = st.file_uploader("Adjunta tu CV", type=["pdf", "docx"])
         if st.button("Enviar solicitud"):
             st.success("Tu solicitud ha sido enviada. ¡Gracias por postularte!")
+
 
