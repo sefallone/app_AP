@@ -30,7 +30,7 @@ CONFIG_IMAGENES = {
         "eclair": "Brazo.jpg",
         "croissant": "Caracolas.jpg",
         "cafe_especial": "Cafe.jpg",
-        "tarta_frambuesa": "Milhojas.jpg"
+        "tarta_frambuesa": "Profiterol.jpg"
     },
     "ofertas": {
         "cumpleanos": "Brazo.jpg",
