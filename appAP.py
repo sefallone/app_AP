@@ -7,6 +7,8 @@ import json
 import time
 from datetime import datetime, date
 from streamlit_option_menu import option_menu
+from PIL import Image
+import base64
 
 # ==================================================
 # CONFIGURACIÓN FIREBASE - REEMPLAZAR CON TUS DATOS
@@ -40,6 +42,20 @@ PRODUCTOS = [
         "precio_original": 8.00,
         "imagen": "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300",
         "categoria": "panaderia"
+    },
+    {
+        "nombre": "Café Especial Arte París",
+        "puntos": 15,
+        "precio_original": 5.00,
+        "imagen": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300",
+        "categoria": "bebida"
+    },
+    {
+        "nombre": "Tarta de Frambuesa",
+        "puntos": 80,
+        "precio_original": 35.00,
+        "imagen": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=300",
+        "categoria": "especial"
     }
 ]
 
@@ -49,11 +65,18 @@ PRODUCTOS = [
 OFERTAS_ESPECIALES = [
     {
         "titulo": "🎁 Regalo de Cumpleaños",
-        "descripcion": "Dulce sorpresa especial para tu día",
+        "descripcion": "Café especial + Dulce sorpresa para tu día",
         "puntos": 0,
         "imagen": "https://images.unsplash.com/photo-1535254973040-607b474cb50d?w=300",
         "exclusivo": True,
         "cumpleanos": True
+    },
+    {
+        "titulo": "☕ Combo Mañana Francesa",
+        "descripcion": "Café + Croissant + Macaron",
+        "puntos": 65,
+        "imagen": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=300",
+        "exclusivo": True
     }
 ]
 
@@ -86,6 +109,32 @@ def signup_user(email, password, nombre, fecha_cumpleanos=None):
             
     except Exception as e:
         raise Exception(f"Error en registro: {str(e)}")
+
+# ==================================================
+# FUNCIÓN: LOGIN USUARIO
+# ==================================================
+def login_user(email, password):
+    """Login con Firebase REST API"""
+    try:
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_CONFIG['API_KEY']}"
+        payload = json.dumps({
+            "email": email,
+            "password": password,
+            "returnSecureToken": True
+        })
+        headers = {'Content-Type': 'application/json'}
+        
+        response = requests.post(url, data=payload, headers=headers)
+        result = response.json()
+        
+        if response.status_code == 200:
+            return result
+        else:
+            error_msg = result.get('error', {}).get('message', 'Error desconocido')
+            raise Exception(f"Login falló: {error_msg}")
+            
+    except Exception as e:
+        raise Exception(f"Error en login: {str(e)}")
 
 # ==================================================
 # FUNCIÓN: GUARDAR PERFIL - CON CAMPO DE CUMPLEAÑOS
@@ -268,28 +317,39 @@ def registrar_ticket_compra(uid, monto_compra, numero_ticket):
 # CONFIGURACIÓN PARA MÓVIL
 # ==================================================
 st.set_page_config(
-    page_title="Arte París",
-    page_icon="🎨",
+    page_title="Arte París Delicafé",
+    page_icon="☕",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
 # ==================================================
-# CSS PARA MÓVIL
+# CSS PARA MÓVIL MEJORADO
 # ==================================================
 st.markdown("""
 <style>
-    /* Estilos móviles */
+    /* Estilos móviles mejorados */
     .main > div {
         padding: 0.5rem;
     }
     
-    .mobile-header {
-        font-size: 2rem;
-        color: #FF6B6B;
+    .hero-section {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        padding: 2rem 1rem;
+        border-radius: 20px;
+        color: white;
         text-align: center;
         margin-bottom: 1rem;
-        font-family: 'Brush Script MT', cursive;
+        box-shadow: 0 10px 30px rgba(139, 69, 19, 0.3);
+    }
+    
+    .logo-container {
+        background: white;
+        border-radius: 20px;
+        padding: 1rem;
+        margin: 1rem auto;
+        max-width: 200px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     
     .mobile-card {
@@ -302,12 +362,13 @@ st.markdown("""
     }
     
     .point-card-mobile {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
         padding: 1.5rem;
         border-radius: 15px;
         margin: 1rem 0;
         color: white;
         text-align: center;
+        box-shadow: 0 5px 15px rgba(139, 69, 19, 0.3);
     }
     
     .birthday-card {
@@ -320,15 +381,40 @@ st.markdown("""
         border: 2px solid #FF6B6B;
     }
     
+    .coffee-card {
+        background: linear-gradient(135deg, #4A3520 0%, #8B4513 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        margin: 1rem 0;
+        color: white;
+        text-align: center;
+    }
+    
     .stButton>button {
         width: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
         color: white;
         border: none;
         padding: 0.75rem;
         border-radius: 25px;
         font-weight: bold;
         margin: 0.25rem 0;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(139, 69, 19, 0.4);
+    }
+    
+    .benefit-item {
+        display: flex;
+        align-items: center;
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        background: #FFF8F0;
+        border-radius: 10px;
+        border-left: 4px solid #D2691E;
     }
     
     /* Ocultar elementos no esenciales para móvil */
@@ -379,20 +465,29 @@ if st.session_state.user:
                 orientation="horizontal",
                 styles={
                     "container": {"padding": "0!important", "background-color": "#f8f9fa"},
-                    "icon": {"color": "orange", "font-size": "12px"}, 
+                    "icon": {"color": "#8B4513", "font-size": "12px"}, 
                     "nav-link": {"font-size": "12px", "text-align": "center", "margin":"0px", "--hover-color": "#eee"},
-                    "nav-link-selected": {"background-color": "#764ba2"},
+                    "nav-link-selected": {"background-color": "#8B4513"},
                 }
             )
         
         # PÁGINA DE INICIO
         if selected == "Inicio":
-            st.markdown('<div class="mobile-header">🎨 Arte París</div>', unsafe_allow_html=True)
+            # Hero Section con logo
+            st.markdown("""
+            <div class="hero-section">
+                <div class="logo-container">
+                    <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Ait Paris</h2>
+                    <h3 style="color: #D2691E; margin: 0; font-size: 1.2rem;">DELICAFÉ</h3>
+                </div>
+                <h3 style="margin: 1rem 0 0 0; font-style: italic;">Donde el café se encuentra con el arte</h3>
+            </div>
+            """, unsafe_allow_html=True)
             
             # Tarjeta de puntos
             st.markdown(f"""
             <div class="point-card-mobile">
-                <h3>⭐ Tus Puntos</h3>
+                <h3>⭐ Tus Puntos Delicafé</h3>
                 <h1 style="font-size: 3rem; margin: 0;">{puntos_usuario}</h1>
                 <p>Puntos acumulados</p>
             </div>
@@ -408,19 +503,22 @@ if st.session_state.user:
                 </div>
                 """, unsafe_allow_html=True)
             
+            # Imagen de café inspiradora
+            st.image("https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400", 
+                    caption="☕ Nuestro café especial - Una obra de arte en cada taza")
+            
             # Acciones rápidas
+            st.subheader("🚀 Acciones Rápidas")
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("📥 Registrar Compra"):
+                if st.button("📥 Registrar Compra", use_container_width=True):
                     st.session_state.registrar_compra = True
-                    st.rerun()
             with col2:
-                if st.button("🎁 Canjear Puntos"):
+                if st.button("🎁 Canjear Puntos", use_container_width=True):
                     st.session_state.canjear_puntos = True
-                    st.rerun()
             
             # Productos destacados
-            st.subheader("🛍️ Destacados")
+            st.subheader("🛍️ Destacados del Mes")
             for producto in PRODUCTOS[:2]:
                 with st.container():
                     st.markdown(f"""
@@ -433,81 +531,111 @@ if st.session_state.user:
         
         # PÁGINA DE PRODUCTOS
         elif selected == "Productos":
-            st.markdown('<div class="mobile-header">🎁 Productos</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <h2 style="color: #8B4513; margin: 0;">🎁 Productos Delicafé</h2>
+                <p style="color: #666;">Canjea tus puntos por experiencias únicas</p>
+            </div>
+            """, unsafe_allow_html=True)
             
             # Ofertas de cumpleaños
             fecha_cumpleanos = perfil.get('fecha_cumpleanos')
             if fecha_cumpleanos and es_cumpleanos_hoy(fecha_cumpleanos):
-                st.subheader("🎁 Regalo de Cumpleaños")
-                for oferta in OFERTAS_ESPECIALES:
-                    if oferta.get('cumpleanos'):
-                        st.markdown(f"""
-                        <div class="birthday-card">
-                            <h3>{oferta['titulo']}</h3>
-                            <p>{oferta['descripcion']}</p>
-                            <h4>¡GRATIS en tu cumpleaños!</h4>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        if st.button("🎁 Reclamar Regalo", key="cumpleanos"):
-                            st.success("¡Regalo reclamado! Presenta esta pantalla en tienda")
+                st.markdown(f"""
+                <div class="birthday-card">
+                    <h3>🎁 Regalo de Cumpleaños</h3>
+                    <p>¡Café especial + Dulce sorpresa para celebrar contigo!</p>
+                    <h4>¡GRATIS en tu cumpleaños!</h4>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("🎁 Reclamar Regalo de Cumpleaños", use_container_width=True, key="cumpleanos"):
+                    st.success("¡Regalo reclamado! Presenta esta pantalla en tienda para recibir tu sorpresa")
             
             # Todos los productos
-            st.subheader("Todos los Productos")
+            st.subheader("☕ Nuestra Carta")
             for producto in PRODUCTOS:
                 with st.container():
                     disponible = puntos_usuario >= producto['puntos']
                     st.markdown(f"""
-                    <div class="mobile-card" style="opacity: {'1' if disponible else '0.7'}">
+                    <div class="mobile-card" style="opacity: {'1' if disponible else '0.7'};">
                         <img src="{producto['imagen']}" width="100%" style="border-radius: 10px;">
                         <h4>{producto['nombre']}</h4>
                         <p>⭐ {producto['puntos']} puntos</p>
+                        <p><small>Valor: ${producto['precio_original']}</small></p>
                         {"✅ DISPONIBLE" if disponible else f"❌ Te faltan {producto['puntos'] - puntos_usuario} puntos"}
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    if disponible and st.button(f"Canjear {producto['puntos']} pts", key=f"canjear_{producto['nombre']}"):
+                    if disponible and st.button(f"Canjear {producto['puntos']} pts", key=f"canjear_{producto['nombre']}", use_container_width=True):
                         nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
                         if nuevos_puntos >= 0:
-                            st.success(f"¡Canjeado! {producto['nombre']}")
+                            st.success(f"¡Canjeado exitosamente! Disfruta de: {producto['nombre']}")
                             st.balloons()
                             time.sleep(2)
                             st.rerun()
         
         # PÁGINA DE PERFIL
         elif selected == "Perfil":
-            st.markdown('<div class="mobile-header">👤 Perfil</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <h2 style="color: #8B4513; margin: 0;">👤 Tu Perfil</h2>
+                <p style="color: #666;">Gestiona tu cuenta Delicafé</p>
+            </div>
+            """, unsafe_allow_html=True)
             
             # Información del perfil
             st.markdown(f"""
             <div class="mobile-card">
                 <h4>👋 Hola, {perfil['nombre']}</h4>
                 <p>📧 {perfil['email']}</p>
-                <p>⭐ {puntos_usuario} puntos</p>
-                {"🎂 " + perfil['fecha_cumpleanos'].strftime('%d/%m/%Y') if perfil.get('fecha_cumpleanos') else "🎂 No especificada"}
+                <p>⭐ {puntos_usuario} puntos acumulados</p>
+                <p>{"🎂 Cumpleaños: " + perfil['fecha_cumpleanos'].strftime('%d/%m/%Y') if perfil.get('fecha_cumpleanos') else "🎂 Agrega tu fecha de cumpleaños"}</p>
             </div>
             """, unsafe_allow_html=True)
             
             # Estadísticas
-            st.subheader("📊 Estadísticas")
+            st.subheader("📊 Tu Trayectoria Delicafé")
             col1, col2 = st.columns(2)
             with col1:
                 st.metric("Total Gastado", f"${perfil.get('total_compras', 0):.2f}")
             with col2:
-                st.metric("Tickets", perfil.get('tickets_registrados', 0))
+                st.metric("Tickets Registrados", perfil.get('tickets_registrados', 0))
+            
+            # Sistema de niveles
+            st.subheader("🏆 Tu Nivel")
+            if puntos_usuario < 50:
+                nivel = "☕ Aprendiz del Café"
+                progreso = puntos_usuario / 50
+            elif puntos_usuario < 100:
+                nivel = "⭐ Barista"
+                progreso = (puntos_usuario - 50) / 50
+            elif puntos_usuario < 200:
+                nivel = "👑 Maestro Cafetero"
+                progreso = (puntos_usuario - 100) / 100
+            else:
+                nivel = "💎 Leyenda Delicafé"
+                progreso = 1.0
+            
+            st.progress(progreso)
+            st.write(f"**{nivel}** - {puntos_usuario} puntos")
             
             # Registrar compra
-            if st.button("📥 Registrar Nueva Compra", use_container_width=True):
-                with st.form("compra_form"):
-                    numero_ticket = st.text_input("Número de Ticket")
-                    monto_compra = st.number_input("Monto ($)", min_value=0.0, step=0.5)
-                    
-                    if st.form_submit_button("Registrar"):
-                        if numero_ticket and monto_compra > 0:
-                            puntos_ganados = registrar_ticket_compra(uid, monto_compra, numero_ticket)
-                            if puntos_ganados > 0:
-                                st.success(f"¡+{puntos_ganados} puntos!")
-                                time.sleep(2)
-                                st.rerun()
+            st.subheader("📥 Registrar Nueva Compra")
+            with st.form("compra_form"):
+                numero_ticket = st.text_input("Número de Ticket", placeholder="TKT-001")
+                monto_compra = st.number_input("Monto de la Compra ($)", min_value=0.0, step=0.5, value=0.0)
+                
+                if st.form_submit_button("📥 Registrar Compra y Ganar Puntos", use_container_width=True):
+                    if numero_ticket.strip() and monto_compra > 0:
+                        puntos_ganados = registrar_ticket_compra(uid, monto_compra, numero_ticket)
+                        if puntos_ganados > 0:
+                            st.success(f"✅ ¡Compra registrada! Ganaste {puntos_ganados} puntos")
+                            time.sleep(2)
+                            st.rerun()
+                        else:
+                            st.error("❌ Error al registrar la compra")
+                    else:
+                        st.warning("⚠️ Ingresa un número de ticket y monto válidos")
             
             # Cerrar sesión
             st.markdown("---")
@@ -516,66 +644,115 @@ if st.session_state.user:
                 st.rerun()
 
 # ==================================================
-# INTERFAZ DE LOGIN/CREAR CUENTA PARA MÓVIL
+# INTERFAZ DE LOGIN/CREAR CUENTA MEJORADA
 # ==================================================
 else:
-    st.markdown('<div class="mobile-header">🎨 Arte París</div>', unsafe_allow_html=True)
+    # Hero Section para login
+    st.markdown("""
+    <div class="hero-section">
+        <div class="logo-container">
+            <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Ait Paris</h2>
+            <h3 style="color: #D2691E; margin: 0; font-size: 1.2rem;">DELICAFÉ</h3>
+        </div>
+        <h3 style="margin: 1rem 0 0 0; font-style: italic;">Donde el café se encuentra con el arte</h3>
+    </div>
+    """, unsafe_allow_html=True)
     
-    tab1, tab2 = st.tabs(["Ingresar", "Crear Cuenta"])
+    # Imagen atractiva de café
+    st.image("https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400", 
+             caption="🎨 Cada taza es una experiencia artística")
+    
+    tab1, tab2 = st.tabs(["🚀 Ingresar", "📝 Crear Cuenta"])
     
     with tab1:
-        st.subheader("🚀 Ingresar")
+        st.subheader("Bienvenido de vuelta")
         with st.form("login_form"):
-            email = st.text_input("📧 Email")
+            email = st.text_input("📧 Email", placeholder="tu@email.com")
             password = st.text_input("🔒 Contraseña", type="password")
             
-            if st.form_submit_button("Ingresar", use_container_width=True):
+            if st.form_submit_button("🎯 Ingresar a Mi Cuenta", use_container_width=True):
                 if email and password:
                     try:
                         user_info = login_user(email, password)
                         st.session_state.user = user_info
-                        st.success("¡Bienvenido!")
+                        st.success("¡Bienvenido de vuelta a Delicafé!")
                         time.sleep(1)
                         st.rerun()
                     except Exception as e:
                         st.error(f"Error: {e}")
+                else:
+                    st.warning("Por favor completa todos los campos")
     
     with tab2:
-        st.subheader("📝 Crear Cuenta")
-        st.info("🎁 ¡Recibe 10 puntos de bienvenida!")
+        st.subheader("Únete a la Familia Delicafé")
+        st.info("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")
         
         with st.form("registro_form"):
-            nombre = st.text_input("👤 Nombre completo")
-            email = st.text_input("📧 Email")
+            nombre = st.text_input("👤 Nombre completo", placeholder="Claude Monet")
+            email = st.text_input("📧 Email", placeholder="claude@arteparis.com")
             password = st.text_input("🔒 Contraseña", type="password")
             fecha_cumpleanos = st.date_input(
                 "🎂 Fecha de Cumpleaños (opcional)",
                 value=None,
                 min_value=date(1900, 1, 1),
-                max_value=date.today()
+                max_value=date.today(),
+                help="¡Recibe regalos especiales en tu cumpleaños!"
             )
             
-            if st.form_submit_button("Crear Cuenta", use_container_width=True):
+            if st.form_submit_button("🎨 Unirme a Delicafé", use_container_width=True):
                 if nombre and email and password:
                     try:
                         user_info = signup_user(email, password, nombre, fecha_cumpleanos)
                         st.session_state.user = user_info
                         st.balloons()
-                        st.success("¡Cuenta creada! 10 puntos de regalo")
-                        time.sleep(2)
+                        st.success("""
+                        🎉 ¡Bienvenido a nuestra familia Delicafé!
+                        
+                        **🎁 Recibiste 10 puntos de bienvenida**
+                        
+                        Ahora puedes:
+                        - Canjear puntos por experiencias únicas
+                        - Acceder a ofertas exclusivas
+                        - Recibir regalos en tu cumpleaños
+                        """)
+                        time.sleep(3)
                         st.rerun()
                     except Exception as e:
                         st.error(f"Error: {e}")
                 else:
-                    st.warning("Completa los campos obligatorios")
+                    st.warning("Por favor completa los campos obligatorios")
+    
+    # Beneficios section
+    st.markdown("---")
+    st.subheader("⭐ Beneficios Exclusivos")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div class="benefit-item">
+            <span>☕ 5 puntos por cada $5</span>
+        </div>
+        <div class="benefit-item">
+            <span>🎁 Regalos cumpleaños</span>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="benefit-item">
+            <span>⭐ Ofertas exclusivas</span>
+        </div>
+        <div class="benefit-item">
+            <span>👑 Trato preferencial</span>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ==================================================
-# FOOTER MÓVIL
+# FOOTER MÓVIL MEJORADO
 # ==================================================
 st.markdown("---")
 st.markdown(
-    '<div style="text-align: center; color: #666; font-size: 0.8rem;">'
-    '🎨 Arte París - Tu pastelería francesa favorita'
+    '<div style="text-align: center; color: #666; font-size: 0.8rem; padding: 1rem;">'
+    '☕ <strong>Ait Paris Delicafé</strong> - Donde cada taza cuenta una historia 🎨'
     '</div>',
     unsafe_allow_html=True
 )
