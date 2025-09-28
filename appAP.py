@@ -119,7 +119,7 @@ def cargar_imagen_local(ruta_imagen, ancho_maximo=800):  # Reducido de 400 a 300
                 nuevo_alto = int(alto_original * ratio)
                 imagen = imagen.resize((ancho_maximo, nuevo_alto), Image.Resampling.LANCZOS)
             
-            st.image(imagen, use_container_width=False)  # Cambiado a False
+            st.image(imagen, use_container_width= True)  # Cambiado a False
             return True
         else:
             st.error(f"❌ No se encontró: {ruta_imagen}")
