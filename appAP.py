@@ -103,7 +103,7 @@ OFERTAS_ESPECIALES = [
 # ==================================================
 # FUNCIONES PARA MANEJO DE IMÁGENES LOCALES
 # ==================================================
-def cargar_imagen_local(ruta_imagen, ancho_maximo=400):  # Reducido de 400 a 300
+def cargar_imagen_local(ruta_imagen, ancho_maximo=800):  # Reducido de 400 a 300
     """
     Carga una imagen local y la muestra en Streamlit
     Si no encuentra la imagen, muestra un placeholder
@@ -143,10 +143,10 @@ def mostrar_logo():
         logo = Image.open(CONFIG_IMAGENES["logo"])
         # Logo más pequeño - 200px de ancho máximo
         ancho_original, alto_original = logo.size
-        if ancho_original > 350:
-            ratio = 350 / ancho_original
+        if ancho_original > 600:
+            ratio = 600 / ancho_original
             nuevo_alto = int(alto_original * ratio)
-            logo = logo.resize((350, nuevo_alto), Image.Resampling.LANCZOS)
+            logo = logo.resize((600, nuevo_alto), Image.Resampling.LANCZOS)
         st.image(logo, use_container_width=False)
     else:
         st.markdown("""
