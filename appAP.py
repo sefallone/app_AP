@@ -123,6 +123,6 @@ elif st.session_state.section == "nosotros":
     st.write("Si quieres unirte a nuestro equipo, envía tu CV a rrhh@arteparis.com")
 
 st.markdown('</div>', unsafe_allow_html=True)
-``
+
 
 
