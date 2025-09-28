@@ -1,208 +1,117 @@
 import streamlit as st
 
+# Configuración inicial
 st.set_page_config(page_title="Arte París", layout="wide")
 
-# ==== CSS estilo Starbucks Desktop ====
+# Estilos personalizados (Navbar + general)
 st.markdown("""
-<style>
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #ffffff;
-    color: #333;
-    margin: 0;
-    padding: 0;
-}
-.navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: white;
-    border-bottom: 1px solid #eee;
-    padding: 1rem 3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 999;
-}
-.navbar a {
-    color: #333;
-    margin-left: 30px;
-    text-decoration: none;
-    font-weight: 600;
-    position: relative;
-}
-.navbar a::after {
-    content: '';
-    display: block;
-    width: 0;
-    height: 2px;
-    background: #8B4513;
-    transition: width .3s;
-    margin-top: 4px;
-}
-.navbar a:hover::after {
-    width: 100%;
-}
-.hero {
-    height: 90vh;
-    background-image: url("https://images.unsplash.com/photo-1509042239860-f550ce710b93");
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    color: white;
-    text-shadow: 0px 2px 6px rgba(0,0,0,0.5);
-}
-.hero h1 {
-    font-size: 3.8rem;
-}
-.hero p {
-    font-size: 1.3rem;
-    margin-top: 10px;
-}
-.hero a {
-    margin-top: 25px;
-    background: #8B4513;
-    color: white;
-    padding: 14px 36px;
-    border-radius: 30px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background 0.3s;
-}
-.hero a:hover {
-    background: #A0522D;
-}
-.section {
-    padding: 6rem 6rem;
-}
-.section h2 {
-    font-size: 2.2rem;
-    color: #4b2e2e;
-    margin-bottom: 2rem;
-}
-.section img {
-    width: 100%;
-    border-radius: 16px;
-    margin-top: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-.footer {
-    text-align: center;
-    padding: 3rem;
-    background: #f8f8f8;
-    color: #555;
-    margin-top: 3rem;
-}
-.footer a {
-    text-decoration: none;
-    margin: 0 10px;
-    color: #333;
-    font-weight: 600;
-}
-.footer a:hover {
-    color: #8B4513;
-}
-</style>
+    <style>
+    body {
+        background-color: #ffffff;
+        font-family: "Helvetica Neue", sans-serif;
+    }
+    /* Navbar */
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background-color: white;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        z-index: 999;
+    }
+    .navbar a {
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 16px;
+        color: #333;
+        padding: 6px 10px;
+        transition: all 0.3s ease;
+    }
+    .navbar a:hover {
+        color: #b8860b;
+    }
+    .content {
+        margin-top: 80px;
+        padding: 20px 60px;
+    }
+    .section img {
+        max-width: 80%;
+        border-radius: 10px;
+        margin: 20px auto;
+        display: block;
+    }
+    .title {
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    .subtitle {
+        font-size: 18px;
+        font-weight: 400;
+        text-align: center;
+        margin-bottom: 40px;
+        color: #555;
+    }
+    </style>
 """, unsafe_allow_html=True)
 
-# ==== Navbar ====
+# Navbar con enlaces
 st.markdown("""
 <div class="navbar">
-    <div><b>Arte París</b></div>
-    <div>
-        <a href="#productos">Productos</a>
-        <a href="#club">Club</a>
-        <a href="#delivery">Delivery</a>
-        <a href="#nosotros">Nosotros</a>
-    </div>
+    <a href="/?section=menu">Productos</a>
+    <a href="/?section=club">ArteParísClub</a>
+    <a href="/?section=delivery">Delivery</a>
+    <a href="/?section=nosotros">Nosotros</a>
 </div>
 """, unsafe_allow_html=True)
 
-# ==== Hero ====
-st.markdown("""
-<div class="hero">
-    <h1>Arte París Café & Pastelería</h1>
-    <p>Dulces momentos para compartir</p>
-    <a href="#productos">Explora nuestro menú</a>
-</div>
-""", unsafe_allow_html=True)
+# Detectar sección seleccionada
+section = st.query_params.get("section", ["menu"])[0]
 
-# ==== Productos ====
-st.markdown('<div id="productos" class="section">', unsafe_allow_html=True)
-st.markdown("## 🥐 Nuestros Productos")
+# Contenido
+st.markdown('<div class="content">', unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
-with col1:
-    st.image("https://images.unsplash.com/photo-1509440159596-0249088772ff")
-    st.subheader("Bollería")
-    st.write("Recién horneada cada mañana, con mantequilla de verdad.")
-    st.button("Ver más", key="bolleria")
+if section == "menu":
+    st.markdown('<div class="title">Nuestro Menú</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Bollería • Dulces Secos • Pastelería Fría • Restaurant</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("https://images.unsplash.com/photo-1509042239860-f550ce710b93", caption="Bollería", use_container_width=True)
+    with col2:
+        st.image("https://images.unsplash.com/photo-1578985545062-69928b1d9587", caption="Pastelería", use_container_width=True)
 
-with col2:
-    st.image("https://images.unsplash.com/photo-1604152135912-04a022e23696")
-    st.subheader("Dulces Secos")
-    st.write("Perfectos para acompañar tu café en cualquier momento.")
-    st.button("Ver más", key="dulces")
+elif section == "club":
+    st.markdown('<div class="title">ArteParísClub</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Regístrate o inicia sesión para acumular puntos</div>', unsafe_allow_html=True)
+    st.image("https://images.unsplash.com/photo-1523906834658-6e24ef2386f9", use_container_width=True)
 
-col3, col4 = st.columns(2)
-with col3:
-    st.image("https://images.unsplash.com/photo-1548943487-a2e4e43b4853")
-    st.subheader("Pastelería Fría")
-    st.write("Postres frescos y cremosos para cada ocasión.")
-    st.button("Ver más", key="fria")
+elif section == "delivery":
+    st.markdown('<div class="title">Delivery</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Llevamos tu pedido a la puerta de tu casa</div>', unsafe_allow_html=True)
+    st.image("https://images.unsplash.com/photo-1600891964599-f61ba0e24092", use_container_width=True)
 
-with col4:
-    st.image("https://images.unsplash.com/photo-1604908554049-889c2b6f5c3f")
-    st.subheader("Restaurant")
-    st.write("Platos ligeros para complementar tu experiencia dulce.")
-    st.button("Ver más", key="restaurant")
+elif section == "nosotros":
+    st.markdown('<div class="title">Nosotros</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Conoce nuestra historia y filosofía</div>', unsafe_allow_html=True)
+    st.write("### Visión")
+    st.write("Ser el lugar preferido para disfrutar café y pastelería artesanal en un ambiente acogedor.")
+    st.write("### Misión")
+    st.write("Ofrecer productos de alta calidad elaborados con pasión y dedicación.")
+    st.write("### Contacto")
+    st.write("📍 Dirección: Calle Principal #123, Ciudad")
+    st.write("📞 Teléfono: +34 600 000 000")
+    st.write("✉️ Email: contacto@arteparis.com")
+    st.write("### Trabaja con nosotros")
+    st.write("Si quieres unirte a nuestro equipo, envía tu CV a rrhh@arteparis.com")
 
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-# ==== Club ====
-st.markdown('<div id="club" class="section" style="background:#fdf6f0;">', unsafe_allow_html=True)
-st.markdown("## 🎉 ArteParísClub")
-st.write("Únete a nuestro club, acumula puntos y gana recompensas exclusivas.")
-st.button("👉 Únete ahora", key="club")
-st.markdown("</div>", unsafe_allow_html=True)
-
-# ==== Delivery ====
-st.markdown('<div id="delivery" class="section">', unsafe_allow_html=True)
-st.markdown("## 🚚 Delivery")
-st.image("https://images.unsplash.com/photo-1600891964599-f61ba0e24092")
-st.write("""
-Pide desde la comodidad de tu casa:  
-1. Haz tu pedido online o por WhatsApp.  
-2. Elige recogida o envío.  
-3. Pago online o contra entrega.  
-4. Entrega en 30-45 min.
-""")
-st.button("📦 Pide ahora", key="delivery")
-st.markdown("</div>", unsafe_allow_html=True)
-
-# ==== Nosotros ====
-st.markdown('<div id="nosotros" class="section" style="background:#f8f8f8;">', unsafe_allow_html=True)
-st.markdown("## 👩‍🍳 Sobre Nosotros")
-st.image("https://images.unsplash.com/photo-1527169402691-a3fb2e5259fe")
-st.write("**Visión:** Ser la pastelería de referencia en la ciudad...")  
-st.write("**Misión:** Ofrecer experiencias dulces únicas...")
-st.write("📍 Dirección: Calle Principal 123, Ciudad")  
-st.write("📧 contacto@arteparis.com | ☎️ 123-456-789")
-st.markdown("</div>", unsafe_allow_html=True)
-
-# ==== Footer ====
-st.markdown("""
-<div class="footer">
-    <p>Arte París © 2025 — Todos los derechos reservados</p>
-    <p>
-        <a href="https://instagram.com" target="_blank">Instagram</a> |
-        <a href="https://facebook.com" target="_blank">Facebook</a> |
-        <a href="https://tiktok.com" target="_blank">TikTok</a>
-    </p>
-</div>
 """, unsafe_allow_html=True)
 
