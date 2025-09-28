@@ -2,4 +2,3 @@ firebase-admin
 google-cloud-firestore
 streamlit
 requests
-PIL
