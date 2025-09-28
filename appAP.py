@@ -28,7 +28,7 @@ CONFIG_IMAGENES = {
     "productos": {
         "macarons": "Milhojas.jpg",
         "eclair": "Brazo.jpg",
-        "croissant": "Caracolas.jpg",
+        "croissant": "Croissant.jpg",
         "cafe_especial": "Cafe.jpg",
         "tarta_frambuesa": "Profiterol.jpg"
     },
@@ -137,7 +137,7 @@ def mostrar_logo():
     else:
         st.markdown("""
         <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Ait Paris</h2>
-        <h3 style="color: #D2691E; margin: 0; font-size: 1.2rem;">DELICAFÉ</h3>
+        <h3 style="color: #D2691E; margin: 0; font-size: 1.2rem;">ARTE PARÍS</h3>
         """, unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
@@ -307,7 +307,7 @@ def es_cumpleanos_hoy(fecha_cumpleanos):
 # CONFIGURACIÓN STREAMLIT
 # ==================================================
 st.set_page_config(
-    page_title="Ait Paris Delicafé",
+    page_title="Arte Paris Deli café",
     page_icon="☕",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -330,7 +330,7 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     .mobile-card {
-        background: white;
+        background: green;
         padding: 1rem;
         border-radius: 15px;
         margin: 0.5rem 0;
@@ -422,7 +422,7 @@ if st.session_state.user:
         if selected == "Inicio":
             st.markdown("""
             <div class="hero-section">
-                <h3 style="margin: 0; font-style: italic;">Donde el café se encuentra con el arte</h3>
+                <h3 style="margin: 0; font-style: italic;">Lo convertimos en Arte</h3>
             </div>
             """, unsafe_allow_html=True)
             
@@ -431,7 +431,7 @@ if st.session_state.user:
             # Tarjeta de puntos
             st.markdown(f"""
             <div class="point-card-mobile">
-                <h3>⭐ Tus Puntos Delicafé</h3>
+                <h3>⭐ Tus Puntos ArteParís</h3>
                 <h1 style="font-size: 3rem; margin: 0;">{puntos_usuario}</h1>
                 <p>Puntos acumulados</p>
             </div>
@@ -449,7 +449,7 @@ if st.session_state.user:
             
             # Imagen principal local
             st.subheader("☕ Nuestra Esencia")
-            cargar_imagen_local(CONFIG_IMAGENES["hero"], "🎨 Donde el café se encuentra con el arte")
+            cargar_imagen_local(CONFIG_IMAGENES["hero"], "🎨 Donde el café es arte")
             
             # Acciones rápidas
             st.subheader("🚀 Acciones Rápidas")
@@ -477,7 +477,7 @@ if st.session_state.user:
         elif selected == "Productos":
             st.markdown("""
             <div style="text-align: center; margin-bottom: 1rem;">
-                <h2 style="color: #8B4513; margin: 0;">🎁 Productos Delicafé</h2>
+                <h2 style="color: #8B4513; margin: 0;">🎁 Productos Arte París</h2>
                 <p style="color: #666;">Canjea tus puntos por experiencias únicas</p>
             </div>
             """, unsafe_allow_html=True)
@@ -576,7 +576,7 @@ else:
     # Hero Section
     st.markdown("""
     <div class="hero-section">
-        <h3 style="margin: 0; font-style: italic;">Bienvenido a Ait Paris Delicafé</h3>
+        <h3 style="margin: 0; font-style: italic;">Bienvenido a Arte Paris Deli Café</h3>
     </div>
     """, unsafe_allow_html=True)
     
@@ -584,7 +584,7 @@ else:
     mostrar_logo()
     
     # Imagen principal local
-    cargar_imagen_local(CONFIG_IMAGENES["hero"], "🎨 Donde el café se encuentra con el arte")
+    cargar_imagen_local(CONFIG_IMAGENES["hero"], "🎨 Donde el café es arte")
     
     # Tabs de login/registro
     tab1, tab2 = st.tabs(["🚀 Ingresar", "📝 Crear Cuenta"])
@@ -624,14 +624,14 @@ else:
                 help="¡Recibe regalos especiales en tu cumpleaños!"
             )
             
-            if st.form_submit_button("🎨 Unirme a Delicafé", use_container_width=True):
+            if st.form_submit_button("🎨 Unirme a Arte París", use_container_width=True):
                 if nombre and email and password:
                     try:
                         user_info = signup_user(email, password, nombre, fecha_cumpleanos)
                         st.session_state.user = user_info
                         st.balloons()
                         st.success("""
-                        🎉 ¡Bienvenido a nuestra familia Delicafé!
+                        🎉 ¡Bienvenido al Club Arte París!
                         
                         **🎁 Recibiste 10 puntos de bienvenida**
                         
