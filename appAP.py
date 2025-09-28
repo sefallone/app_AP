@@ -334,7 +334,7 @@ st.markdown("""
         padding: 1rem;
         border-radius: 15px;
         margin: 0.5rem 0;
-        border: 2px solid #f8f9fa;
+        border: 2px solid #061B30;
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
     .point-card-mobile {
@@ -342,7 +342,7 @@ st.markdown("""
         padding: 1.5rem;
         border-radius: 15px;
         margin: 1rem 0;
-        color: Black;
+        color: black;
         text-align: center;
     }
     .birthday-card {
@@ -350,13 +350,13 @@ st.markdown("""
         padding: 1rem;
         border-radius: 15px;
         margin: 1rem 0;
-        color: white;
+        color: black;
         text-align: center;
         border: 2px solid #FF6B6B;
     }
     .stButton>button {
         width: 100%;
-        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        background: linear-gradient(135deg, #135454 0%, #135454 100%);
         color: black;
         border: none;
         padding: 0.75rem;
@@ -412,9 +412,9 @@ if st.session_state.user:
                 orientation="horizontal",
                 styles={
                     "container": {"padding": "0!important", "background-color": "#f8f9fa"},
-                    "icon": {"color": "#8B4513", "font-size": "12px"}, 
+                    "icon": {"color": "#4EDED7", "font-size": "12px"}, 
                     "nav-link": {"font-size": "12px", "text-align": "center", "margin":"0px", "--hover-color": "#eee"},
-                    "nav-link-selected": {"background-color": "#8B4513"},
+                    "nav-link-selected": {"background-color": "#4EDED7"},
                 }
             )
         
@@ -477,7 +477,7 @@ if st.session_state.user:
         elif selected == "Productos":
             st.markdown("""
             <div style="text-align: center; margin-bottom: 1rem;">
-                <h2 style="color: #8B4513; margin: 0;">🎁 Productos Arte París</h2>
+                <h2 style="color: #3DCCC5; margin: 0;">🎁 Productos Arte París</h2>
                 <p style="color: #666;">Canjea tus puntos por experiencias únicas</p>
             </div>
             """, unsafe_allow_html=True)
@@ -526,7 +526,7 @@ if st.session_state.user:
         elif selected == "Perfil":
             st.markdown("""
             <div style="text-align: center; margin-bottom: 1rem;">
-                <h2 style="color: #8B4513; margin: 0;">👤 Tu Perfil</h2>
+                <h2 style="color: #3DCCC5; margin: 0;">👤 Tu Perfil</h2>
                 <p style="color: #666;">Gestiona tu cuenta Arte París</p>
             </div>
             """, unsafe_allow_html=True)
@@ -677,7 +677,7 @@ else:
 st.markdown("---")
 st.markdown(
     '<div style="text-align: center; color: #666; font-size: 0.8rem; padding: 1rem;">'
-    '☕ <strong>Ait Paris Delicafé</strong> - Donde cada taza cuenta una historia 🎨'
+    '☕ <strong>Arte Paris Deli café</strong> - Donde cada taza cuenta una historia 🎨'
     '</div>',
     unsafe_allow_html=True
 )
