@@ -1,136 +1,180 @@
 import streamlit as st
 
-# --- CONFIGURACIÓN ---
-st.set_page_config(page_title="Arte París Café - Pastelería", page_icon="🍰", layout="wide")
+# --------------------
+# Config
+# --------------------
+st.set_page_config(page_title="Arte París - Café & Pastelería", page_icon="🍰", layout="wide")
 
-# --- ESTILOS CSS ---
+# --------------------
+# Estilos (fondo blanco y limpieza)
+# --------------------
 st.markdown(
     """
     <style>
-        body {
-            background-color: white;
-        }
-        .menu {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            padding: 1rem;
-            background-color: #fff;
-            border-bottom: 2px solid #f0f0f0;
-            font-family: 'Arial', sans-serif;
-        }
-        .menu a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        .menu a:hover {
-            color: #b5651d; /* color café */
-        }
-        .title {
-            text-align: center;
-            padding: 2rem;
-        }
+    /* Fondo general */
+    .stApp {
+        background: #ffffff;
+        color: #222222;
+        font-family: "Inter", "Arial", sans-serif;
+    }
+
+    /* Encabezado */
+    .app-header {
+        display:flex;
+        align-items:center;
+        gap: 16px;
+        padding: 12px 8px;
+    }
+    .app-title {
+        margin: 0;
+    }
+
+    /* Tarjetas de producto */
+    .product-card {
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        background: #ffffff;
+    }
+
+    /* Ajustes responsivos */
+    @media (max-width: 640px) {
+        .app-header { flex-direction: column; gap: 6px; text-align:center; }
+    }
     </style>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
-# --- MENÚ SUPERIOR ---
-st.markdown(
-    """
-    <div class="menu">
-        <a href="?page=productos">Productos</a>
-        <a href="?page=club">ArteParísClub</a>
-        <a href="?page=delivery">Delivery</a>
-        <a href="?page=nosotros">Nosotros</a>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# --------------------
+# Header (logo + nombre)
+# --------------------
+header_col1, header_col2 = st.columns([1, 5])
+with header_col1:
+    # si tienes logo local, úsalo: st.image("logo.png", width=90)
+    st.image("https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&s=1a8fa9f4b8c1a3ea4b6df6b3e9a6f0b0",
+             width=90)
+with header_col2:
+    st.markdown("<h1 class='app-title' style='margin:0'>Arte París</h1>"
+                "<div style='color:#6b4a2a'>Café • Pastelería</div>",
+                unsafe_allow_html=True)
 
-# --- LÓGICA DE NAVEGACIÓN ---
-query_params = st.experimental_get_query_params()
-page = query_params.get("page", ["productos"])[0]
+st.markdown("---")
 
-# --- CONTENIDO ---
-if page == "productos":
-    st.markdown("<h1 class='title'>🍰 Menú de Productos</h1>", unsafe_allow_html=True)
-    col1, col2, col3, col4 = st.columns(4)
+# --------------------
+# Navegación principal: TABS (se queda en la misma página)
+# --------------------
+tabs = st.tabs(["Productos", "ArteParísClub", "Delivery", "Nosotros"])
 
-    with col1:
-        st.image("https://images.unsplash.com/photo-1509440159598-05d26c92d3a1", use_container_width=True)
-        st.subheader("🥐 Bollería")
-        st.write("Croissant, Napolitana, Pan de queso...")
+# ---------- TAB: Productos ----------
+with tabs[0]:
+    st.markdown("## 🍰 Menú de Productos")
+    # categorías
+    categorias = ["Bollería", "Dulces Secos", "Pastelería Fría", "Restaurant"]
+    imagenes = [
+        "https://images.unsplash.com/photo-1509440159598-05d26c92d3a1?q=80&w=700&auto=format&fit=crop&ixlib=rb-4.0.3&s=0be6c8d4e9b7e1e1c6a9a3bebb3a2b2b",
+        "https://images.unsplash.com/photo-1606788075761-7a07aab8f207?q=80&w=700&auto=format&fit=crop&ixlib=rb-4.0.3&s=b3c6d3b48b0f7b8b8a8a6a5b6c5d4e3f",
+        "https://images.unsplash.com/photo-1622495896520-3f5f6ad39e1d?q=80&w=700&auto=format&fit=crop&ixlib=rb-4.0.3&s=1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f",
+        "https://images.unsplash.com/photo-1529042410759-befb1204b468?q=80&w=700&auto=format&fit=crop&ixlib=rb-4.0.3&s=abcdef1234567890abcdef1234567890"
+    ]
 
-    with col2:
-        st.image("https://images.unsplash.com/photo-1606788075761-7a07aab8f207", use_container_width=True)
-        st.subheader("🍪 Dulces Secos")
-        st.write("Galletas, Alfajores, Brownies...")
+    cols = st.columns(4, gap="large")
+    for i, cat in enumerate(categorias):
+        with cols[i]:
+            st.markdown(f"<div class='product-card'>", unsafe_allow_html=True)
+            st.image(imagenes[i], use_container_width=True)
+            st.subheader(cat)
+            # Ejemplo de items; luego puedes cargar desde DB
+            if cat == "Bollería":
+                st.write("- Croissant\n- Napolitana de chocolate\n- Pan de queso")
+            elif cat == "Dulces Secos":
+                st.write("- Galletas\n- Alfajores\n- Brownies")
+            elif cat == "Pastelería Fría":
+                st.write("- Cheesecake\n- Tiramisú\n- Tartaletas")
+            else:
+                st.write("- Sandwiches\n- Almuerzos\n- Ensaladas")
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    with col3:
-        st.image("https://images.unsplash.com/photo-1622495896520-3f5f6ad39e1d", use_container_width=True)
-        st.subheader("🎂 Pastelería Fría")
-        st.write("Cheesecake, Tiramisú, Tartaletas...")
+# ---------- TAB: ArteParísClub ----------
+with tabs[1]:
+    st.markdown("## 🎉 ArteParísClub — acumula puntos")
+    # Si el usuario ya está en session_state mostramos perfil simple
+    if st.session_state.get("user_logged", False):
+        st.success(f"Bienvenido/a, {st.session_state.get('user_name')} — Puntos: {st.session_state.get('points', 0)}")
+        if st.button("Cerrar sesión", key="logout_button"):
+            st.session_state["user_logged"] = False
+            st.session_state.pop("user_name", None)
+            st.session_state.pop("points", None)
+            st.experimental_rerun()
 
-    with col4:
-        st.image("https://images.unsplash.com/photo-1529042410759-befb1204b468", use_container_width=True)
-        st.subheader("🍴 Restaurant")
-        st.write("Sandwiches, Almuerzos, Ensaladas...")
+    else:
+        modo = st.radio("¿Quieres:", ["Registrarse", "Iniciar sesión"], horizontal=True)
+        if modo == "Registrarse":
+            with st.form("form_reg", clear_on_submit=True):
+                nombre = st.text_input("Nombre completo")
+                email = st.text_input("Correo electrónico")
+                password = st.text_input("Contraseña", type="password")
+                send = st.form_submit_button("Registrarme")
+                if send:
+                    # Aquí sólo simulamos registro (en prod: guardar en DB y hashear pass)
+                    st.session_state["user_logged"] = True
+                    st.session_state["user_name"] = nombre or email.split("@")[0]
+                    st.session_state["points"] = 0
+                    st.success("Registro exitoso 🎉")
+        else:  # Iniciar sesión (simulación)
+            with st.form("form_login", clear_on_submit=False):
+                email = st.text_input("Correo electrónico", key="login_email")
+                password = st.text_input("Contraseña", type="password", key="login_pwd")
+                submit = st.form_submit_button("Entrar")
+                if submit:
+                    # Simulación: en producción validar contra DB
+                    st.session_state["user_logged"] = True
+                    st.session_state["user_name"] = email.split("@")[0] if email else "Cliente"
+                    st.session_state.setdefault("points", 0)
+                    st.success("Has iniciado sesión ✅")
 
-elif page == "club":
-    st.markdown("<h1 class='title'>🎉 ArteParísClub</h1>", unsafe_allow_html=True)
-    opcion = st.radio("Selecciona una opción:", ["Registrarse", "Iniciar Sesión"], horizontal=True)
+    st.markdown("---")
+    st.write("Cómo funcionan los puntos (ejemplo):")
+    st.write("- 1€ gastado = 1 punto\n- 100 puntos = 5€ de descuento\n- Promos exclusivas para socios")
 
-    if opcion == "Registrarse":
-        nombre = st.text_input("Nombre completo")
-        email = st.text_input("Correo electrónico")
-        password = st.text_input("Contraseña", type="password")
-        if st.button("Registrarme"):
-            st.success(f"Usuario {nombre} registrado con éxito 🎉")
-
-    elif opcion == "Iniciar Sesión":
-        email = st.text_input("Correo electrónico")
-        password = st.text_input("Contraseña", type="password")
-        if st.button("Ingresar"):
-            st.success("Inicio de sesión exitoso ✅")
-
-elif page == "delivery":
-    st.markdown("<h1 class='title'>🚚 Delivery</h1>", unsafe_allow_html=True)
-    st.image("https://images.unsplash.com/photo-1617196037302-9b845a1efb1b", use_container_width=True)
+# ---------- TAB: Delivery ----------
+with tabs[2]:
+    st.markdown("## 🚚 Delivery")
+    st.image("https://images.unsplash.com/photo-1617196037302-9b845a1efb1b?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=1234567890abcdef", use_container_width=True)
     st.write("""
-    📦 **Cómo funciona nuestro delivery:**
-    1. Haz tu pedido online o por WhatsApp.
+    **Cómo funciona nuestro delivery**
+    1. Haz el pedido por la web o por WhatsApp.
     2. Escoge recogida en tienda o envío a domicilio.
-    3. Paga con tarjeta o contra entrega.
-    4. Tiempo estimado: 30-45 minutos.
+    3. Modalidades de pago: tarjeta en línea / contra entrega.
+    4. Tiempo estimado: 30 - 45 minutos (depende de la zona).
     """)
+    st.info("Si quieres, puedo agregar un formulario de pedido o integración con un sistema de pedidos.")
 
-elif page == "nosotros":
-    st.markdown("<h1 class='title'>👩‍🍳 Nosotros</h1>", unsafe_allow_html=True)
-    opcion = st.radio("Explora:", ["Visión", "Misión", "Contacto", "Trabaja con nosotros"], horizontal=True)
-
-    if opcion == "Visión":
+# ---------- TAB: Nosotros ----------
+with tabs[3]:
+    st.markdown("## 👩‍🍳 Nosotros")
+    sub = st.radio("", ["Visión", "Misión", "Contacto", "Trabaja con nosotros"], horizontal=True)
+    if sub == "Visión":
         st.subheader("🌟 Nuestra Visión")
-        st.write("Ser la pastelería de referencia en la ciudad...")
-
-    elif opcion == "Misión":
+        st.write("Ser la pastelería de referencia en la ciudad, ofreciendo productos artesanales y una experiencia cálida.")
+    elif sub == "Misión":
         st.subheader("🎯 Nuestra Misión")
-        st.write("Ofrecer experiencias dulces únicas...")
-
-    elif opcion == "Contacto":
+        st.write("Elaborar productos frescos, con ingredientes de calidad y atención cercana a nuestros clientes.")
+    elif sub == "Contacto":
         st.subheader("📞 Contáctanos")
-        st.write("📍 Dirección: Calle Ejemplo 123, Ciudad")
-        st.write("📧 Email: info@arteparis.com")
-        st.write("📱 Teléfono: +34 600 123 456")
+        st.write("📍 Calle Ejemplo 123 — Ciudad")
+        st.write("📧 info@arteparis.com")
+        st.write("📱 +34 600 123 456")
+    else:
+        st.subheader("💼 Trabaja con nosotros")
+        with st.form("form_apply", clear_on_submit=True):
+            nombre = st.text_input("Nombre")
+            correo = st.text_input("Correo electrónico", key="apply_email")
+            cv = st.file_uploader("Adjunta tu CV (pdf/docx)", type=["pdf", "docx"])
+            enviar = st.form_submit_button("Enviar solicitud")
+            if enviar:
+                st.success("Gracias — recibimos tu solicitud. Te contactaremos si hay vacantes.")
 
-    elif opcion == "Trabaja con nosotros":
-        st.subheader("💼 Forma parte de nuestro equipo")
-        nombre = st.text_input("Nombre")
-        email = st.text_input("Correo electrónico")
-        cv = st.file_uploader("Adjunta tu CV", type=["pdf", "docx"])
-        if st.button("Enviar solicitud"):
-            st.success("Tu solicitud ha sido enviada. ¡Gracias por postularte!")
+
 
 
