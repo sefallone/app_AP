@@ -618,9 +618,7 @@ else:
             email = st.text_input("📧 Email", placeholder="tu@email.com")
             password = st.text_input("🔒 Contraseña", type="password", placeholder="Crea una contraseña")
             fecha_cumpleanos = st.date_input(
-                "🎂 Fecha de Cumpleaños (opcional) 
-                Añade tu cumpleaños para que podamos felicitarte y enviarte 
-                un vale de regalo tu cumpleaños.",
+                "🎂 Fecha de Cumpleaños (opcional) Añade tu cumpleaños para que podamos felicitarte y enviarte un vale de regalo tu cumpleaños.",
                 value=None,
                 min_value=date(1900, 1, 1),
                 max_value=date.today(),
