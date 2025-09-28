@@ -609,8 +609,8 @@ else:
                     st.warning("Por favor completa todos los campos")
     
     with tab2:
-        st.subheader("Únete al Club Arte París, para conseguir puntos, que podrás canjear por comida y bebidas gratis,Podrás hacer pedidos con tu celular, recibirás una recompensa de cumpleaños y mucho más.")
-            
+        st.subheader("Únete al Club Arte París")
+        st.markdown("Para conseguir puntos, que podrás canjear por comida y bebidas gratis,Podrás hacer pedidos con tu celular, recibirás una recompensa de cumpleaños y mucho más.")
         st.info("🎁 **¡Regístrate y recibe 10 puntos de bienvenida!**")
         
         with st.form("registro_form"):
