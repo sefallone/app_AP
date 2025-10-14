@@ -412,11 +412,11 @@ def mostrar_producto_horizontal(producto, puntos_usuario, uid):
         
         with col_texto:
             st.markdown(f"""
-            <div class="product-card-horizontal" style="opacity: {'1' if disponible else '0.7'};">
-                <h4 style="color: #2C5530; margin-bottom: 5px;">{producto['nombre']}</h4>
-                <p style="color: #4A6741; margin: 2px 0;">⭐ <strong>{producto['puntos']} puntos</strong></p>
-                <p style="color: #666; margin: 2px 0; font-size: 0.9rem;">Valor: ${producto['precio_original']:.2f}</p>
-                <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 5px 0; font-weight: bold;">
+            <div class="product-card-horizontal">
+                <h4 style="color: #2C5530; margin-bottom: 8px; font-size: 1.1rem;">{producto['nombre']}</h4>
+                <p style="color: #4A6741; margin: 4px 0; font-size: 0.95rem;">⭐ <strong>{producto['puntos']} puntos</strong></p>
+                <p style="color: #666; margin: 4px 0; font-size: 0.85rem;">Valor: ${producto['precio_original']:.2f}</p>
+                <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 8px 0; font-weight: bold; font-size: 0.9rem;">
                     {"✅ DISPONIBLE" if disponible else f"❌ Te faltan {producto['puntos'] - puntos_usuario} puntos"}
                 </p>
             </div>
@@ -438,109 +438,6 @@ def mostrar_producto_horizontal(producto, puntos_usuario, uid):
             # Imagen más pequeña a la derecha
             cargar_imagen_producto(producto['imagen'], 120)
 
-def mostrar_menu_inferior(seleccion_actual):
-    """Menú inferior fijo funcional"""
-    # CSS mejorado para el menú
-    st.markdown("""
-    <style>
-        .fixed-bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-top: 2px solid #3DCCC5;
-            padding: 8px 0;
-            z-index: 9999;
-            display: flex;
-            justify-content: space-around;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        }
-        .nav-item {
-            text-align: center;
-            padding: 5px;
-            flex: 1;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .nav-item.active {
-            color: #3DCCC5;
-            font-weight: bold;
-            background: #f0f9f9;
-            border-radius: 10px;
-            margin: 0 5px;
-        }
-        .nav-icon {
-            font-size: 18px;
-            margin-bottom: 2px;
-        }
-        .nav-text {
-            font-size: 12px;
-            font-weight: normal;
-        }
-        .main-content {
-            margin-bottom: 80px;
-            padding-bottom: 10px;
-        }
-        
-        /* Ocultar los botones de Streamlit pero mantener funcionalidad */
-        .stButton > button {
-            width: 100%;
-            border: none;
-            background: transparent;
-            color: transparent;
-            padding: 15px 0;
-            margin: 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 10000;
-            cursor: pointer;
-        }
-        .nav-button-container {
-            position: relative;
-            flex: 1;
-            text-align: center;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Mostrar menú visual
-    menu_html = f"""
-    <div class="fixed-bottom-nav">
-        <div class="nav-item {'active' if seleccion_actual == 'Inicio' else ''}">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-text">Inicio</div>
-        </div>
-        <div class="nav-item {'active' if seleccion_actual == 'Productos' else ''}">
-            <div class="nav-icon">🎁</div>
-            <div class="nav-text">Productos</div>
-        </div>
-        <div class="nav-item {'active' if seleccion_actual == 'Perfil' else ''}">
-            <div class="nav-icon">👤</div>
-            <div class="nav-text">Perfil</div>
-        </div>
-    </div>
-    """
-    st.markdown(menu_html, unsafe_allow_html=True)
-    
-    # Botones invisibles superpuestos
-    cols = st.columns(3)
-    with cols[0]:
-        if st.button("Inicio", key="nav_inicio_hidden"):
-            st.session_state.pagina_actual = "Inicio"
-            st.rerun()
-    with cols[1]:
-        if st.button("Productos", key="nav_productos_hidden"):
-            st.session_state.pagina_actual = "Productos"
-            st.rerun()
-    with cols[2]:
-        if st.button("Perfil", key="nav_perfil_hidden"):
-            st.session_state.pagina_actual = "Perfil"
-            st.rerun()
-
 # ==================================================
 # CONFIGURACIÓN STREAMLIT
 # ==================================================
@@ -558,6 +455,7 @@ st.markdown("""
 <style>
     .main > div {
         padding: 0.5rem;
+        margin-bottom: 80px;
     }
     .hero-section {
         background: linear-gradient(135deg, #46E0E0 0%, #38C7C7 100%);
@@ -576,7 +474,7 @@ st.markdown("""
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
     .product-card-horizontal {
-        background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+        background: #FFFFFF;
         padding: 1rem;
         border-radius: 15px;
         margin: 0.5rem 0;
@@ -634,8 +532,117 @@ st.markdown("""
         border: 1px solid #ddd;
         margin: 0.5rem 0;
     }
+    
+    /* MENÚ INFERIOR FIJO - CORREGIDO */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 2px solid #3DCCC5;
+        padding: 10px 0;
+        z-index: 9999;
+        display: flex;
+        justify-content: space-around;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+    .nav-item {
+        text-align: center;
+        padding: 5px;
+        flex: 1;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .nav-item.active {
+        color: #3DCCC5;
+        font-weight: bold;
+        background: #f0f9f9;
+        border-radius: 10px;
+        margin: 0 5px;
+    }
+    .nav-icon {
+        font-size: 20px;
+        margin-bottom: 2px;
+    }
+    .nav-text {
+        font-size: 12px;
+        font-weight: normal;
+    }
+    
+    /* Botones invisibles para el menú */
+    .nav-button {
+        position: absolute;
+        width: 33.33%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 10000;
+    }
+    .nav-button-1 { left: 0; }
+    .nav-button-2 { left: 33.33%; }
+    .nav-button-3 { left: 66.66%; }
 </style>
 """, unsafe_allow_html=True)
+
+def mostrar_menu_inferior(pagina_actual):
+    """Menú inferior fijo que SÍ funciona"""
+    # HTML del menú visual
+    menu_html = f"""
+    <div class="bottom-nav">
+        <div class="nav-item {'active' if pagina_actual == 'Inicio' else ''}">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-text">Inicio</div>
+        </div>
+        <div class="nav-item {'active' if pagina_actual == 'Productos' else ''}">
+            <div class="nav-icon">🎁</div>
+            <div class="nav-text">Productos</div>
+        </div>
+        <div class="nav-item {'active' if pagina_actual == 'Perfil' else ''}">
+            <div class="nav-icon">👤</div>
+            <div class="nav-text">Perfil</div>
+        </div>
+        
+        <!-- Botones invisibles superpuestos -->
+        <button class="nav-button nav-button-1" onclick="window.navigateTo('Inicio')"></button>
+        <button class="nav-button nav-button-2" onclick="window.navigateTo('Productos')"></button>
+        <button class="nav-button nav-button-3" onclick="window.navigateTo('Perfil')"></button>
+    </div>
+    
+    <script>
+        function navigateTo(pagina) {{
+            // Esta función se ejecutará cuando se haga clic en los botones
+            const event = new CustomEvent('navigate', {{ detail: {{ page: pagina }} }});
+            window.dispatchEvent(event);
+        }}
+        
+        // Escuchar el evento personalizado
+        window.addEventListener('navigate', function(event) {{
+            // Enviar el comando a Streamlit
+            window.parent.postMessage({{
+                type: 'streamlit:setComponentValue',
+                value: event.detail.page
+            }}, '*');
+        }});
+    </script>
+    """
+    
+    st.markdown(menu_html, unsafe_allow_html=True)
+    
+    # Usar componentes de Streamlit para capturar los clics
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button(" ", key="nav_inicio_btn"):
+            st.session_state.pagina_actual = "Inicio"
+            st.rerun()
+    with col2:
+        if st.button("  ", key="nav_productos_btn"):
+            st.session_state.pagina_actual = "Productos"
+            st.rerun()
+    with col3:
+        if st.button("   ", key="nav_perfil_btn"):
+            st.session_state.pagina_actual = "Perfil"
+            st.rerun()
 
 # ==================================================
 # MANEJO DE SESIÓN
@@ -663,8 +670,7 @@ if st.session_state.user:
     if perfil:
         puntos_usuario = perfil.get('puntos', 0)
         
-        st.markdown('<div class="main-content">', unsafe_allow_html=True)
-        
+        # CONTENIDO PRINCIPAL
         if st.session_state.pagina_actual == "Inicio":
             st.markdown("""
             <div class="hero-section">
@@ -710,8 +716,8 @@ if st.session_state.user:
                 with st.container():
                     st.markdown(f"""
                     <div class="mobile-card">
-                        <h4>{producto['nombre']}</h4>
-                        <p>⭐ {producto['puntos']} puntos</p>
+                        <h4 style="color: #2C5530;">{producto['nombre']}</h4>
+                        <p style="color: #4A6741;">⭐ {producto['puntos']} puntos</p>
                     </div>
                     """, unsafe_allow_html=True)
                     cargar_imagen_movil(producto['imagen'], 250)
@@ -752,12 +758,12 @@ if st.session_state.user:
             
             st.markdown(f"""
             <div class="mobile-card">
-                <h4>👋 Hola, {perfil['nombre']}</h4>
-                <p>📧 {perfil['email']}</p>
-                <p>⭐ {puntos_usuario} puntos acumulados</p>
-                <p>💰 ${perfil.get('total_compras', 0):.2f} gastados</p>
-                <p>🎫 {perfil.get('tickets_registrados', 0)} tickets registrados</p>
-                <p>{"🎂 " + perfil['fecha_cumpleanos'].strftime('%d/%m/%Y') if perfil.get('fecha_cumpleanos') else "🎂 Sin fecha de cumpleaños"}</p>
+                <h4 style="color: #2C5530;">👋 Hola, {perfil['nombre']}</h4>
+                <p style="color: #4A6741;">📧 {perfil['email']}</p>
+                <p style="color: #4A6741;">⭐ {puntos_usuario} puntos acumulados</p>
+                <p style="color: #4A6741;">💰 ${perfil.get('total_compras', 0):.2f} gastados</p>
+                <p style="color: #4A6741;">🎫 {perfil.get('tickets_registrados', 0)} tickets registrados</p>
+                <p style="color: #4A6741;">{"🎂 " + perfil['fecha_cumpleanos'].strftime('%d/%m/%Y') if perfil.get('fecha_cumpleanos') else "🎂 Sin fecha de cumpleaños"}</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -770,7 +776,7 @@ if st.session_state.user:
                 st.session_state.pagina_actual = "Inicio"
                 st.rerun()
         
-        st.markdown('</div>', unsafe_allow_html=True)
+        # MENÚ INFERIOR - SIEMPRE AL FINAL
         mostrar_menu_inferior(st.session_state.pagina_actual)
 
 else:
