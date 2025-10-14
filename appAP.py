@@ -215,14 +215,10 @@ def mostrar_hero_productos():
     """, unsafe_allow_html=True)
 
 def mostrar_producto_elegante(producto, puntos_usuario, uid):
-    """Diseño elegante tipo magazine para productos"""
+    """Diseño elegante tipo magazine para productos - CORREGIDO"""
     disponible = puntos_usuario >= producto['puntos']
     
     with st.container():
-        st.markdown("""
-        <div style='margin: 2rem 0; padding: 0;'>
-        """, unsafe_allow_html=True)
-        
         # Layout de dos columnas
         col_imagen, col_texto = st.columns([2, 3])
         
@@ -247,7 +243,7 @@ def mostrar_producto_elegante(producto, puntos_usuario, uid):
             """, unsafe_allow_html=True)
         
         with col_texto:
-            # Información del producto
+            # Información del producto - CORREGIDO: usar st.markdown con unsafe_allow_html=True
             st.markdown(f"""
             <div style="padding: 1rem;">
                 <h3 style="color: #8B4513; font-size: 1.4rem; margin-bottom: 0.5rem; 
@@ -267,8 +263,7 @@ def mostrar_producto_elegante(producto, puntos_usuario, uid):
                     </p>
                     <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 0.3rem 0 0 0; 
                                font-weight: bold; font-size: 0.9rem;">
-                        {("✅ Listo para canjear" if disponible else 
-                          f"❌ Necesitas {producto['puntos'] - puntos_usuario} puntos más")}
+                        {"✅ Listo para canjear" if disponible else f"❌ Necesitas {producto['puntos'] - puntos_usuario} puntos más"}
                     </p>
                 </div>
             </div>
@@ -288,11 +283,10 @@ def mostrar_producto_elegante(producto, puntos_usuario, uid):
                             time.sleep(2)
                             st.rerun()
         
-        st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("---")
 
 def mostrar_producto_destacado(producto, puntos_usuario, uid):
-    """Versión compacta para productos destacados en inicio"""
+    """Versión compacta para productos destacados en inicio - CORREGIDO"""
     disponible = puntos_usuario >= producto['puntos']
     
     with st.container():
@@ -330,8 +324,7 @@ def mostrar_producto_destacado(producto, puntos_usuario, uid):
                     </p>
                     <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 0.2rem 0 0 0; 
                                font-weight: bold; font-size: 0.8rem;">
-                        {("✅ Disponible" if disponible else 
-                          f"❌ +{producto['puntos'] - puntos_usuario} pts")}
+                        {"✅ Disponible" if disponible else f"❌ +{producto['puntos'] - puntos_usuario} pts"}
                     </p>
                 </div>
             </div>
