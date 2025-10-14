@@ -36,43 +36,53 @@ CONFIG_IMAGENES = {
 }
 
 # ==================================================
-# DATOS DE PRODUCTOS
+# DATOS DE PRODUCTOS MEJORADOS
 # ==================================================
 PRODUCTOS = [
     {
-        "nombre": "Milhojas",
+        "nombre": "Milhojas Clásico",
         "puntos": 100,
         "precio_original": 4.00,
         "imagen": CONFIG_IMAGENES["productos"]["Milhojas"],
-        "categoria": "clasico"
+        "categoria": "pasteleria",
+        "descripcion": "Capas crujientes de hojaldre intercaladas con crema pastelera suave. Un clásico francés que nunca pasa de moda.",
+        "destacado": True
     },
     {
         "nombre": "Brazo Gitano",
         "puntos": 80,
         "precio_original": 3.00,
         "imagen": CONFIG_IMAGENES["productos"]["brazo"],
-        "categoria": "clasico"
+        "categoria": "pasteleria", 
+        "descripcion": "Bizcocho esponjoso relleno de dulce de leche o crema, enrollado a la perfección. Tradición en cada rebanada.",
+        "destacado": False
     },
     {
-        "nombre": "Croissant Dulce",
+        "nombre": "Croissant de Mantequilla",
         "puntos": 50,
         "precio_original": 2.50,
         "imagen": CONFIG_IMAGENES["productos"]["croissant"],
-        "categoria": "panaderia"
+        "categoria": "panaderia",
+        "descripcion": "Capas doradas y crujientes con el auténtico sabor de la mantequilla. Perfecto para empezar el día.",
+        "destacado": True
     },
     {
         "nombre": "Café Especial Arte París",
         "puntos": 100,
         "precio_original": 4.00,
         "imagen": CONFIG_IMAGENES["productos"]["cafe_especial"],
-        "categoria": "bebida"
+        "categoria": "bebida",
+        "descripcion": "Mezcla exclusiva de granos arábica tostados a la perfección. Aromas intensos con un final suave y persistente.",
+        "destacado": True
     },
     {
-        "nombre": "Profiterol",
+        "nombre": "Profiteroles",
         "puntos": 80,
         "precio_original": 35.00,
         "imagen": CONFIG_IMAGENES["productos"]["profiterol"],
-        "categoria": "especial"
+        "categoria": "especial",
+        "descripcion": "Bolitas de profiterol rellenas de crema y bañadas en salsa de chocolate belga. Indulgencia pura.",
+        "destacado": False
     }
 ]
 
@@ -126,8 +136,8 @@ def cargar_imagen_movil(ruta_imagen, ancho_maximo=300):
         st.error(f"❌ Error cargando imagen: {e}")
         return False
 
-def cargar_imagen_producto(ruta_imagen, ancho_maximo=120):
-    """Versión más pequeña para productos en layout horizontal"""
+def cargar_imagen_producto(ruta_imagen, ancho_maximo=200):
+    """Versión mejorada para diseño estético"""
     try:
         if os.path.exists(ruta_imagen):
             imagen = Image.open(ruta_imagen)
@@ -142,7 +152,7 @@ def cargar_imagen_producto(ruta_imagen, ancho_maximo=120):
             st.image(imagen, use_container_width=True)
             return True
         else:
-            st.image("https://via.placeholder.com/100x80/8B4513/FFFFFF?text=Img", 
+            st.image("https://via.placeholder.com/200x150/8B4513/FFFFFF?text=Imagen+No+Encontrada", 
                     use_container_width=True)
             return False
     except Exception as e:
@@ -172,6 +182,126 @@ def mostrar_logo():
         """, unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
+
+# ==================================================
+# DISEÑO ESTÉTICO MEJORADO PARA PRODUCTOS
+# ==================================================
+def mostrar_hero_productos():
+    """Sección hero mejorada para productos"""
+    st.markdown("""
+    <div style="text-align: center; padding: 2rem 1rem; border-radius: 20px; margin-bottom: 2rem;">
+        <h1 style="color: #8B4513; font-size: 2rem; margin-bottom: 1rem; font-family: 'Georgia', serif;">
+            Lo Mejor de Arte París
+        </h1>
+        <p style="color: #666; font-size: 1.1rem; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+            Descubre nuestros productos artesanales, donde cada detalle cuenta una historia de sabor y tradición. 
+            Desde el primer sorbo hasta el último bocado, experiencias creadas para momentos especiales.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+def mostrar_producto_elegante(producto, puntos_usuario, uid):
+    """Diseño elegante tipo magazine para productos"""
+    disponible = puntos_usuario >= producto['puntos']
+    
+    with st.container():
+        st.markdown("""
+        <div style='margin: 2rem 0; padding: 0;'>
+        """, unsafe_allow_html=True)
+        
+        # Layout de dos columnas
+        col_imagen, col_texto = st.columns([2, 3])
+        
+        with col_imagen:
+            # Imagen con estilo elegante
+            st.markdown("""
+            <div style="border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+                        transition: transform 0.3s ease; margin-bottom: 1rem;">
+            """, unsafe_allow_html=True)
+            cargar_imagen_producto(producto['imagen'], 250)
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+            # Badge de puntos
+            st.markdown(f"""
+            <div style="text-align: center; margin-top: 0.5rem;">
+                <span style="background: linear-gradient(135deg, #FFD700, #FFA500); 
+                            color: white; padding: 0.5rem 1rem; border-radius: 20px; 
+                            font-weight: bold; font-size: 0.9rem;">
+                    ⭐ {producto['puntos']} puntos
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col_texto:
+            # Información del producto
+            st.markdown(f"""
+            <div style="padding: 1rem;">
+                <h3 style="color: #8B4513; font-size: 1.4rem; margin-bottom: 0.5rem; 
+                          font-family: 'Georgia', serif; border-bottom: 2px solid #F4A460; 
+                          padding-bottom: 0.5rem;">
+                    {producto['nombre']}
+                </h3>
+                
+                <p style="color: #666; line-height: 1.6; font-size: 0.95rem; margin-bottom: 1rem;">
+                    {producto['descripcion']}
+                </p>
+                
+                <div style="background: #FFF8E1; padding: 0.8rem; border-radius: 10px; 
+                           border-left: 4px solid #FFA500; margin-bottom: 1rem;">
+                    <p style="color: #8B4513; margin: 0; font-size: 0.9rem;">
+                        <strong>Valor original:</strong> ${producto['precio_original']:.2f}
+                    </p>
+                    <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 0.3rem 0 0 0; 
+                               font-weight: bold; font-size: 0.9rem;">
+                        {("✅ Listo para canjear" if disponible else 
+                          f"❌ Necesitas {producto['puntos'] - puntos_usuario} puntos más")}
+                    </p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Botón de canje
+            if disponible:
+                col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+                with col_btn2:
+                    if st.button(f"🎁 Canjear {producto['puntos']} puntos", 
+                               key=f"canjear_{producto['nombre']}", 
+                               use_container_width=True):
+                        nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
+                        if nuevos_puntos >= 0:
+                            st.success(f"¡Canjeado! Disfruta de tu {producto['nombre']}")
+                            st.session_state.profile = None
+                            time.sleep(2)
+                            st.rerun()
+        
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("---")
+
+def mostrar_categorias_productos():
+    """Selector de categorías estético"""
+    st.markdown("""
+    <div style="text-align: center; margin: 2rem 0;">
+        <h3 style="color: #8B4513; margin-bottom: 1rem;">Nuestras Categorías</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    cols = st.columns(4)
+    categorias = [
+        {"nombre": "🥐 Panadería", "icono": "🥐"},
+        {"nombre": "🍰 Pastelería", "icono": "🍰"},
+        {"nombre": "☕ Bebidas", "icono": "☕"},
+        {"nombre": "🎁 Especiales", "icono": "🎁"}
+    ]
+    
+    for i, categoria in enumerate(categorias):
+        with cols[i]:
+            st.markdown(f"""
+            <div style="text-align: center; padding: 1rem; background: #FFF8E1; 
+                        border-radius: 10px; border: 2px solid #F4A460;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">{categoria['icono']}</div>
+                <div style="color: #8B4513; font-weight: bold;">{categoria['nombre']}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
 # ==================================================
 # SISTEMA QR PARA COMPRAS SEGURAS
@@ -400,47 +530,9 @@ def es_cumpleanos_hoy(fecha_cumpleanos):
     return fecha_cumpleanos.month == hoy.month and fecha_cumpleanos.day == hoy.day
 
 # ==================================================
-# COMPONENTES INTERFAZ MÓVIL
+# MENÚ INFERIOR
 # ==================================================
-def mostrar_producto_horizontal(producto, puntos_usuario, uid):
-    """Mostrar producto en layout horizontal con imagen a la derecha"""
-    disponible = puntos_usuario >= producto['puntos']
-    
-    # Crear contenedor horizontal
-    with st.container():
-        col_texto, col_imagen = st.columns([3, 2])
-        
-        with col_texto:
-            st.markdown(f"""
-            <div class="product-card-horizontal">
-                <h4 style="color: #2C5530; margin-bottom: 8px; font-size: 1.1rem;">{producto['nombre']}</h4>
-                <p style="color: #4A6741; margin: 4px 0; font-size: 0.95rem;">⭐ <strong>{producto['puntos']} puntos</strong></p>
-                <p style="color: #666; margin: 4px 0; font-size: 0.85rem;">Valor: ${producto['precio_original']:.2f}</p>
-                <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 8px 0; font-weight: bold; font-size: 0.9rem;">
-                    {"✅ DISPONIBLE" if disponible else f"❌ Te faltan {producto['puntos'] - puntos_usuario} puntos"}
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Botón de canje
-            if disponible:
-                if st.button(f"🎁 Canjear {producto['puntos']} pts", 
-                           key=f"canjear_{producto['nombre']}", 
-                           use_container_width=True):
-                    nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
-                    if nuevos_puntos >= 0:
-                        st.success(f"¡Canjeado! {producto['nombre']}")
-                        st.session_state.profile = None
-                        time.sleep(2)
-                        st.rerun()
-        
-        with col_imagen:
-            # Imagen más pequeña a la derecha
-            cargar_imagen_producto(producto['imagen'], 120)
-
 def mostrar_menu_inferior():
-    """Menú inferior fijo que SÍ funciona en Streamlit"""
-    # CSS para el menú fijo
     st.markdown("""
     <style>
     .bottom-nav-container {
@@ -479,13 +571,30 @@ def mostrar_menu_inferior():
     .main-content {
         margin-bottom: 80px;
     }
+    
+    div[data-testid="column"] button {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        height: 60px;
+        width: 33.33%;
+        z-index: 10000;
+        cursor: pointer;
+    }
+    div[data-testid="column"]:nth-child(1) button {
+        left: 0;
+    }
+    div[data-testid="column"]:nth-child(2) button {
+        left: 33.33%;
+    }
+    div[data-testid="column"]:nth-child(3) button {
+        left: 66.66%;
+    }
     </style>
     """, unsafe_allow_html=True)
     
-    # Determinar página activa
     pagina_actual = st.session_state.get('pagina_actual', 'Inicio')
     
-    # Mostrar menú visual
     menu_html = f"""
     <div class="bottom-nav-container">
         <div class="nav-item {'active' if pagina_actual == 'Inicio' else ''}">
@@ -504,20 +613,16 @@ def mostrar_menu_inferior():
     """
     st.markdown(menu_html, unsafe_allow_html=True)
     
-    # Botones invisibles de Streamlit para capturar clics
     col1, col2, col3 = st.columns(3)
     with col1:
-        # Botón invisible para Inicio
         if st.button("Inicio", key="nav_inicio_btn", help="Ir a Inicio"):
             st.session_state.pagina_actual = "Inicio"
             st.rerun()
     with col2:
-        # Botón invisible para Productos  
         if st.button("Productos", key="nav_productos_btn", help="Ir a Productos"):
             st.session_state.pagina_actual = "Productos"
             st.rerun()
     with col3:
-        # Botón invisible para Perfil
         if st.button("Perfil", key="nav_perfil_btn", help="Ir a Perfil"):
             st.session_state.pagina_actual = "Perfil"
             st.rerun()
@@ -556,14 +661,6 @@ st.markdown("""
         border: 2px solid #061B30;
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
-    .product-card-horizontal {
-        background: #FFFFFF;
-        padding: 1rem;
-        border-radius: 15px;
-        margin: 0.5rem 0;
-        border: 2px solid #E9ECEF;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
     .point-card-mobile {
         background: linear-gradient(135deg, #46E0E0 0%, #46E0E0 100%);
         padding: 1.5rem;
@@ -583,13 +680,19 @@ st.markdown("""
     }
     .stButton>button {
         width: 100%;
-        background: linear-gradient(135deg, #135454 0%, #135454 100%);
+        background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
         color: white;
         border: none;
         padding: 0.75rem;
         border-radius: 25px;
         font-weight: bold;
         margin: 0.25rem 0;
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
     }
     .benefit-item {
         display: flex;
@@ -614,26 +717,6 @@ st.markdown("""
         border-radius: 10px;
         border: 1px solid #ddd;
         margin: 0.5rem 0;
-    }
-    
-    /* Ocultar los botones de navegación invisibles */
-    div[data-testid="column"] button {
-        opacity: 0;
-        position: absolute;
-        top: 0;
-        height: 60px;
-        width: 33.33%;
-        z-index: 10000;
-        cursor: pointer;
-    }
-    div[data-testid="column"]:nth-child(1) button {
-        left: 0;
-    }
-    div[data-testid="column"]:nth-child(2) button {
-        left: 33.33%;
-    }
-    div[data-testid="column"]:nth-child(3) button {
-        left: 66.66%;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -718,31 +801,53 @@ if st.session_state.user:
                     cargar_imagen_movil(producto['imagen'], 250)
         
         elif st.session_state.pagina_actual == "Productos":
-            st.markdown("""
-            <div style="text-align: center; margin-bottom: 1rem;">
-                <h2 style="color: #3DCCC5; margin: 0;">🎁 Productos Arte París</h2>
-                <p style="color: #666;">Canjea tus puntos por experiencias únicas</p>
+            # HERO SECTION MEJORADA
+            mostrar_hero_productos()
+            
+            # TARJETA DE PUNTOS
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); 
+                        padding: 1.5rem; border-radius: 15px; margin: 1rem 0; color: white; 
+                        text-align: center; box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);">
+                <h3 style="margin: 0; color: white;">⭐ Tus Puntos Disponibles</h3>
+                <h1 style="font-size: 3rem; margin: 0.5rem 0; color: #FFD700;">{puntos_usuario}</h1>
+                <p style="margin: 0; opacity: 0.9;">Listos para canjear por experiencias únicas</p>
             </div>
             """, unsafe_allow_html=True)
             
+            # OFERTA DE CUMPLEAÑOS
             fecha_cumpleanos = perfil.get('fecha_cumpleanos')
             if fecha_cumpleanos and es_cumpleanos_hoy(fecha_cumpleanos):
                 st.markdown(f"""
-                <div class="birthday-card">
-                    <h3>🎁 ¡Regalo de Cumpleaños!</h3>
-                    <p>Café especial + Dulce sorpresa</p>
-                    <h4>¡GRATIS hoy!</h4>
+                <div style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+                            padding: 1.5rem; border-radius: 15px; margin: 1rem 0; 
+                            text-align: center; box-shadow: 0 8px 25px rgba(255, 165, 0, 0.3);">
+                    <h3 style="color: #8B4513; margin: 0;">🎉 ¡Feliz Cumpleaños!</h3>
+                    <p style="color: #8B4513; margin: 0.5rem 0;">Disfruta de regalos exclusivos en tu día especial</p>
+                    <div style="background: rgba(255,255,255,0.3); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+                        <h4 style="color: #8B4513; margin: 0;">🎁 Café especial + Dulce sorpresa</h4>
+                        <p style="color: #8B4513; margin: 0.5rem 0 0 0; font-weight: bold;">¡GRATIS para ti hoy!</p>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
-                cargar_imagen_movil(OFERTAS_ESPECIALES[0]['imagen'], 250)
-                if st.button("🎁 Reclamar Mi Regalo", use_container_width=True):
-                    st.success("¡Regalo reclamado! Muestra esta pantalla en tienda")
             
-            st.subheader("☕ Nuestra Carta")
+            # CATEGORÍAS
+            mostrar_categorias_productos()
+            
+            # PRODUCTOS
+            st.markdown("""
+            <div style="text-align: center; margin: 3rem 0 2rem 0;">
+                <h2 style="color: #8B4513; font-family: 'Georgia', serif; 
+                          border-bottom: 3px solid #F4A460; padding-bottom: 0.5rem;
+                          display: inline-block;">
+                    Nuestra Selección
+                </h2>
+            </div>
+            """, unsafe_allow_html=True)
+            
             for producto in PRODUCTOS:
-                mostrar_producto_horizontal(producto, puntos_usuario, uid)
-                st.markdown("---")
-        
+                mostrar_producto_elegante(producto, puntos_usuario, uid)
+            
         elif st.session_state.pagina_actual == "Perfil":
             st.markdown("""
             <div style="text-align: center; margin-bottom: 1rem;">
@@ -772,8 +877,6 @@ if st.session_state.user:
                 st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
-        
-        # MENÚ INFERIOR - SIEMPRE AL FINAL
         mostrar_menu_inferior()
 
 else:
