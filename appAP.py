@@ -184,7 +184,7 @@ def mostrar_logo():
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================================================
-# DISEÑO ESTÉTICO MEJORADO PARA PRODUCTOS
+# DISEÑO ESTÉTICO MEJORADO PARA PRODUCTOS - CORREGIDO
 # ==================================================
 def mostrar_hero_inicio():
     """Sección hero mejorada para inicio"""
@@ -215,120 +215,131 @@ def mostrar_hero_productos():
     """, unsafe_allow_html=True)
 
 def mostrar_producto_elegante(producto, puntos_usuario, uid):
-    """Diseño elegante tipo magazine para productos - CORREGIDO"""
+    """Diseño elegante tipo magazine para productos - COMPLETAMENTE CORREGIDO"""
     disponible = puntos_usuario >= producto['puntos']
     
-    with st.container():
-        # Layout de dos columnas
-        col_imagen, col_texto = st.columns([2, 3])
+    # Crear un contenedor con borde y sombra usando HTML/CSS
+    st.markdown("""
+    <div style="border-radius: 15px; padding: 1rem; margin: 1rem 0; background: white; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #E9ECEF;">
+    """, unsafe_allow_html=True)
+    
+    # Layout de dos columnas
+    col_imagen, col_texto = st.columns([2, 3])
+    
+    with col_imagen:
+        # Imagen con estilo elegante
+        st.markdown("""
+        <div style="border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        """, unsafe_allow_html=True)
+        cargar_imagen_producto(producto['imagen'], 250)
+        st.markdown("</div>", unsafe_allow_html=True)
         
-        with col_imagen:
-            # Imagen con estilo elegante
-            st.markdown("""
-            <div style="border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
-                        transition: transform 0.3s ease; margin-bottom: 1rem;">
-            """, unsafe_allow_html=True)
-            cargar_imagen_producto(producto['imagen'], 250)
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-            # Badge de puntos
-            st.markdown(f"""
-            <div style="text-align: center; margin-top: 0.5rem;">
-                <span style="background: linear-gradient(135deg, #FFD700, #FFA500); 
-                            color: white; padding: 0.5rem 1rem; border-radius: 20px; 
-                            font-weight: bold; font-size: 0.9rem;">
-                    ⭐ {producto['puntos']} puntos
-                </span>
-            </div>
-            """, unsafe_allow_html=True)
+        # Badge de puntos
+        st.markdown(f"""
+        <div style="text-align: center; margin-top: 0.5rem;">
+            <span style="background: linear-gradient(135deg, #FFD700, #FFA500); 
+                        color: white; padding: 0.5rem 1rem; border-radius: 20px; 
+                        font-weight: bold; font-size: 0.9rem;">
+                ⭐ {producto['puntos']} puntos
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col_texto:
+        # Título del producto
+        st.markdown(f"""
+        <h3 style="color: #8B4513; font-size: 1.4rem; margin-bottom: 0.5rem; 
+                  font-family: 'Georgia', serif; border-bottom: 2px solid #F4A460; 
+                  padding-bottom: 0.5rem;">
+            {producto['nombre']}
+        </h3>
+        """, unsafe_allow_html=True)
         
-        with col_texto:
-            # Información del producto - CORREGIDO: usar st.markdown con unsafe_allow_html=True
-            st.markdown(f"""
-            <div style="padding: 1rem;">
-                <h3 style="color: #8B4513; font-size: 1.4rem; margin-bottom: 0.5rem; 
-                          font-family: 'Georgia', serif; border-bottom: 2px solid #F4A460; 
-                          padding-bottom: 0.5rem;">
-                    {producto['nombre']}
-                </h3>
-                
-                <p style="color: #666; line-height: 1.6; font-size: 0.95rem; margin-bottom: 1rem;">
-                    {producto['descripcion']}
-                </p>
-                
-                <div style="background: #FFF8E1; padding: 0.8rem; border-radius: 10px; 
-                           border-left: 4px solid #FFA500; margin-bottom: 1rem;">
-                    <p style="color: #8B4513; margin: 0; font-size: 0.9rem;">
-                        <strong>Valor original:</strong> ${producto['precio_original']:.2f}
-                    </p>
-                    <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 0.3rem 0 0 0; 
-                               font-weight: bold; font-size: 0.9rem;">
-                        {"✅ Listo para canjear" if disponible else f"❌ Necesitas {producto['puntos'] - puntos_usuario} puntos más"}
-                    </p>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Botón de canje
-            if disponible:
-                col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
-                with col_btn2:
-                    if st.button(f"🎁 Canjear {producto['puntos']} puntos", 
-                               key=f"canjear_{producto['nombre']}", 
-                               use_container_width=True):
-                        nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
-                        if nuevos_puntos >= 0:
-                            st.success(f"¡Canjeado! Disfruta de tu {producto['nombre']}")
-                            st.session_state.profile = None
-                            time.sleep(2)
-                            st.rerun()
+        # Descripción del producto
+        st.write(producto['descripcion'])
         
-        st.markdown("---")
+        # Información de precio y disponibilidad
+        st.markdown(f"""
+        <div style="background: #FFF8E1; padding: 0.8rem; border-radius: 10px; 
+                   border-left: 4px solid #FFA500; margin: 1rem 0;">
+            <p style="color: #8B4513; margin: 0; font-size: 0.9rem;">
+                <strong>Valor original:</strong> ${producto['precio_original']:.2f}
+            </p>
+            <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 0.3rem 0 0 0; 
+                       font-weight: bold; font-size: 0.9rem;">
+                {"✅ Listo para canjear" if disponible else f"❌ Necesitas {producto['puntos'] - puntos_usuario} puntos más"}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Botón de canje
+        if disponible:
+            if st.button(f"🎁 Canjear {producto['puntos']} puntos", 
+                       key=f"canjear_{producto['nombre']}", 
+                       use_container_width=True):
+                nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
+                if nuevos_puntos >= 0:
+                    st.success(f"¡Canjeado! Disfruta de tu {producto['nombre']}")
+                    st.session_state.profile = None
+                    time.sleep(2)
+                    st.rerun()
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("---")
 
 def mostrar_producto_destacado(producto, puntos_usuario, uid):
-    """Versión compacta para productos destacados en inicio - CORREGIDO"""
+    """Versión compacta para productos destacados en inicio - COMPLETAMENTE CORREGIDO"""
     disponible = puntos_usuario >= producto['puntos']
     
-    with st.container():
-        col_imagen, col_texto = st.columns([2, 3])
+    # Contenedor para el producto destacado
+    st.markdown("""
+    <div style="border-radius: 12px; padding: 1rem; margin: 1rem 0; background: white; 
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #F0F0F0;">
+    """, unsafe_allow_html=True)
+    
+    col_imagen, col_texto = st.columns([2, 3])
+    
+    with col_imagen:
+        cargar_imagen_producto(producto['imagen'], 180)
         
-        with col_imagen:
-            cargar_imagen_producto(producto['imagen'], 180)
-            
-            st.markdown(f"""
-            <div style="text-align: center; margin-top: 0.5rem;">
-                <span style="background: linear-gradient(135deg, #FFD700, #FFA500); 
-                            color: white; padding: 0.3rem 0.8rem; border-radius: 15px; 
-                            font-weight: bold; font-size: 0.8rem;">
-                    ⭐ {producto['puntos']} pts
-                </span>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style="text-align: center; margin-top: 0.5rem;">
+            <span style="background: linear-gradient(135deg, #FFD700, #FFA500); 
+                        color: white; padding: 0.3rem 0.8rem; border-radius: 15px; 
+                        font-weight: bold; font-size: 0.8rem;">
+                ⭐ {producto['puntos']} pts
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col_texto:
+        # Título
+        st.markdown(f"""
+        <h4 style="color: #8B4513; font-size: 1.1rem; margin-bottom: 0.3rem; 
+                  font-family: 'Georgia', serif;">
+            {producto['nombre']}
+        </h4>
+        """, unsafe_allow_html=True)
         
-        with col_texto:
-            st.markdown(f"""
-            <div style="padding: 0.5rem;">
-                <h4 style="color: #8B4513; font-size: 1.1rem; margin-bottom: 0.3rem; 
-                          font-family: 'Georgia', serif;">
-                    {producto['nombre']}
-                </h4>
-                
-                <p style="color: #666; line-height: 1.4; font-size: 0.85rem; margin-bottom: 0.8rem;">
-                    {producto['descripcion']}
-                </p>
-                
-                <div style="background: #FFF8E1; padding: 0.6rem; border-radius: 8px; 
-                           border-left: 3px solid #FFA500;">
-                    <p style="color: #8B4513; margin: 0; font-size: 0.8rem;">
-                        <strong>Valor:</strong> ${producto['precio_original']:.2f}
-                    </p>
-                    <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 0.2rem 0 0 0; 
-                               font-weight: bold; font-size: 0.8rem;">
-                        {"✅ Disponible" if disponible else f"❌ +{producto['puntos'] - puntos_usuario} pts"}
-                    </p>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        # Descripción
+        st.write(producto['descripcion'])
+        
+        # Información de precio y disponibilidad
+        st.markdown(f"""
+        <div style="background: #FFF8E1; padding: 0.6rem; border-radius: 8px; 
+                   border-left: 3px solid #FFA500; margin-top: 0.5rem;">
+            <p style="color: #8B4513; margin: 0; font-size: 0.8rem;">
+                <strong>Valor:</strong> ${producto['precio_original']:.2f}
+            </p>
+            <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 0.2rem 0 0 0; 
+                       font-weight: bold; font-size: 0.8rem;">
+                {"✅ Disponible" if disponible else f"❌ +{producto['puntos'] - puntos_usuario} pts"}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
 def mostrar_categorias_productos():
     """Selector de categorías estético"""
@@ -425,7 +436,7 @@ def mostrar_registro_compra_seguro(uid):
                 st.error("❌ Código QR inválido o expirado")
 
 # ==================================================
-# FUNCIONES FIREBASE
+# FUNCIONES FIREBASE (se mantienen igual)
 # ==================================================
 def login_user(email, password):
     try:
@@ -583,7 +594,7 @@ def es_cumpleanos_hoy(fecha_cumpleanos):
     return fecha_cumpleanos.month == hoy.month and fecha_cumpleanos.day == hoy.day
 
 # ==================================================
-# MENÚ INFERIOR
+# MENÚ INFERIOR (se mantiene igual)
 # ==================================================
 def mostrar_menu_inferior():
     st.markdown("""
