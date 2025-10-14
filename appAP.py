@@ -184,7 +184,7 @@ def mostrar_logo():
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================================================
-# DISEÑO ESTÉTICO MEJORADO PARA PRODUCTOS - CORREGIDO
+# DISEÑO ESTÉTICO MEJORADO PARA PRODUCTOS
 # ==================================================
 def mostrar_hero_inicio():
     """Sección hero mejorada para inicio"""
@@ -215,7 +215,7 @@ def mostrar_hero_productos():
     """, unsafe_allow_html=True)
 
 def mostrar_producto_elegante(producto, puntos_usuario, uid):
-    """Diseño elegante tipo magazine para productos - COMPLETAMENTE CORREGIDO"""
+    """Diseño elegante tipo magazine para productos"""
     disponible = puntos_usuario >= producto['puntos']
     
     # Crear un contenedor con borde y sombra usando HTML/CSS
@@ -289,7 +289,7 @@ def mostrar_producto_elegante(producto, puntos_usuario, uid):
     st.markdown("---")
 
 def mostrar_producto_destacado(producto, puntos_usuario, uid):
-    """Versión compacta para productos destacados en inicio - COMPLETAMENTE CORREGIDO"""
+    """Versión compacta para productos destacados en inicio"""
     disponible = puntos_usuario >= producto['puntos']
     
     # Contenedor para el producto destacado
@@ -436,7 +436,7 @@ def mostrar_registro_compra_seguro(uid):
                 st.error("❌ Código QR inválido o expirado")
 
 # ==================================================
-# FUNCIONES FIREBASE (se mantienen igual)
+# FUNCIONES FIREBASE
 # ==================================================
 def login_user(email, password):
     try:
@@ -594,11 +594,15 @@ def es_cumpleanos_hoy(fecha_cumpleanos):
     return fecha_cumpleanos.month == hoy.month and fecha_cumpleanos.day == hoy.day
 
 # ==================================================
-# MENÚ INFERIOR (se mantiene igual)
+# MENÚ INFERIOR - COMPLETAMENTE CORREGIDO
 # ==================================================
 def mostrar_menu_inferior():
+    """Menú inferior que SÍ funciona - SOLUCIÓN DEFINITIVA"""
+    
+    # CSS para el menú fijo
     st.markdown("""
     <style>
+    /* Contenedor principal del menú */
     .bottom-nav-container {
         position: fixed;
         bottom: 0;
@@ -606,70 +610,77 @@ def mostrar_menu_inferior():
         right: 0;
         background: white;
         border-top: 2px solid #3DCCC5;
-        padding: 10px 0;
+        padding: 8px 0;
         z-index: 9999;
         display: flex;
         justify-content: space-around;
         box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
     }
+    
+    /* Elementos del menú */
     .nav-item {
         text-align: center;
         padding: 5px;
         flex: 1;
-        border-radius: 10px;
-        margin: 0 5px;
+        border-radius: 8px;
+        margin: 0 2px;
         transition: all 0.3s ease;
+        cursor: pointer;
     }
+    
     .nav-item.active {
         background: #f0f9f9;
         color: #3DCCC5;
         font-weight: bold;
     }
+    
     .nav-icon {
-        font-size: 20px;
+        font-size: 18px;
         margin-bottom: 2px;
     }
+    
     .nav-text {
-        font-size: 12px;
-    }
-    .main-content {
-        margin-bottom: 80px;
+        font-size: 11px;
+        font-weight: normal;
     }
     
-    div[data-testid="column"] button {
-        opacity: 0;
-        position: absolute;
-        top: 0;
+    /* Espacio para el contenido principal */
+    .main-content {
+        margin-bottom: 70px;
+        padding-bottom: 10px;
+    }
+    
+    /* Botones invisibles superpuestos */
+    .nav-button-overlay {
+        position: fixed;
+        bottom: 0;
         height: 60px;
-        width: 33.33%;
-        z-index: 10000;
+        background: transparent;
+        border: none;
         cursor: pointer;
+        z-index: 10000;
     }
-    div[data-testid="column"]:nth-child(1) button {
-        left: 0;
-    }
-    div[data-testid="column"]:nth-child(2) button {
-        left: 33.33%;
-    }
-    div[data-testid="column"]:nth-child(3) button {
-        left: 66.66%;
-    }
+    
+    .nav-button-1 { left: 0%; width: 33.33%; }
+    .nav-button-2 { left: 33.33%; width: 33.33%; }
+    .nav-button-3 { left: 66.66%; width: 33.33%; }
     </style>
     """, unsafe_allow_html=True)
     
     pagina_actual = st.session_state.get('pagina_actual', 'Inicio')
     
+    # Mostrar el menú visual
     menu_html = f"""
     <div class="bottom-nav-container">
-        <div class="nav-item {'active' if pagina_actual == 'Inicio' else ''}">
+        <div class="nav-item {'active' if pagina_actual == 'Inicio' else ''}" id="nav-inicio">
             <div class="nav-icon">🏠</div>
             <div class="nav-text">Inicio</div>
         </div>
-        <div class="nav-item {'active' if pagina_actual == 'Productos' else ''}">
+        <div class="nav-item {'active' if pagina_actual == 'Productos' else ''}" id="nav-productos">
             <div class="nav-icon">🎁</div>
             <div class="nav-text">Productos</div>
         </div>
-        <div class="nav-item {'active' if pagina_actual == 'Perfil' else ''}">
+        <div class="nav-item {'active' if pagina_actual == 'Perfil' else ''}" id="nav-perfil">
             <div class="nav-icon">👤</div>
             <div class="nav-text">Perfil</div>
         </div>
@@ -677,19 +688,35 @@ def mostrar_menu_inferior():
     """
     st.markdown(menu_html, unsafe_allow_html=True)
     
+    # SOLUCIÓN: Usar st.columns con botones invisibles en cada columna
+    # Crear un contenedor invisible en la parte inferior
+    st.markdown('<div style="position: relative; height: 60px;">', unsafe_allow_html=True)
+    
+    # Crear 3 columnas con botones invisibles que cubran toda el área del menú
     col1, col2, col3 = st.columns(3)
+    
     with col1:
-        if st.button("Inicio", key="nav_inicio_btn", help="Ir a Inicio"):
-            st.session_state.pagina_actual = "Inicio"
-            st.rerun()
+        # Botón invisible para Inicio - cubre toda el área del primer ítem del menú
+        if st.button("", key="nav_inicio_hidden", help="Ir a Inicio"):
+            if st.session_state.pagina_actual != "Inicio":
+                st.session_state.pagina_actual = "Inicio"
+                st.rerun()
+    
     with col2:
-        if st.button("Productos", key="nav_productos_btn", help="Ir a Productos"):
-            st.session_state.pagina_actual = "Productos"
-            st.rerun()
+        # Botón invisible para Productos - cubre toda el área del segundo ítem del menú
+        if st.button(" ", key="nav_productos_hidden", help="Ir a Productos"):
+            if st.session_state.pagina_actual != "Productos":
+                st.session_state.pagina_actual = "Productos"
+                st.rerun()
+    
     with col3:
-        if st.button("Perfil", key="nav_perfil_btn", help="Ir a Perfil"):
-            st.session_state.pagina_actual = "Perfil"
-            st.rerun()
+        # Botón invisible para Perfil - cubre toda el área del tercer ítem del menú
+        if st.button("  ", key="nav_perfil_hidden", help="Ir a Perfil"):
+            if st.session_state.pagina_actual != "Perfil":
+                st.session_state.pagina_actual = "Perfil"
+                st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================================================
 # CONFIGURACIÓN STREAMLIT
@@ -781,6 +808,28 @@ st.markdown("""
         border-radius: 10px;
         border: 1px solid #ddd;
         margin: 0.5rem 0;
+    }
+    
+    /* Ocultar los botones del menú */
+    div[data-testid="column"] button {
+        opacity: 0;
+        height: 60px;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        cursor: pointer;
+        z-index: 10000;
+    }
+    
+    /* Posicionar cada botón en su área correspondiente */
+    div[data-testid="column"]:nth-child(1) button {
+        left: 0;
+    }
+    div[data-testid="column"]:nth-child(2) button {
+        left: 33.33%;
+    }
+    div[data-testid="column"]:nth-child(3) button {
+        left: 66.66%;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -976,9 +1025,12 @@ if st.session_state.user:
                 st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
+        
+        # MOSTRAR MENÚ INFERIOR - SIEMPRE AL FINAL
         mostrar_menu_inferior()
 
 else:
+    # PÁGINA DE LOGIN (sin menú inferior)
     st.markdown("""
     <div class="hero-section">
         <h3 style="margin: 0; font-style: italic;">Bienvenido a Arte Paris Deli Café</h3>
