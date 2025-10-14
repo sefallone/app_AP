@@ -126,6 +126,29 @@ def cargar_imagen_movil(ruta_imagen, ancho_maximo=300):
         st.error(f"❌ Error cargando imagen: {e}")
         return False
 
+def cargar_imagen_producto(ruta_imagen, ancho_maximo=120):
+    """Versión más pequeña para productos en layout horizontal"""
+    try:
+        if os.path.exists(ruta_imagen):
+            imagen = Image.open(ruta_imagen)
+            ancho_original, alto_original = imagen.size
+            ancho_objetivo = min(ancho_original, ancho_maximo)
+            
+            if ancho_original > ancho_objetivo:
+                ratio = ancho_objetivo / ancho_original
+                nuevo_alto = int(alto_original * ratio)
+                imagen = imagen.resize((ancho_objetivo, nuevo_alto), Image.Resampling.LANCZOS)
+            
+            st.image(imagen, use_container_width=True)
+            return True
+        else:
+            st.image("https://via.placeholder.com/100x80/8B4513/FFFFFF?text=Img", 
+                    use_container_width=True)
+            return False
+    except Exception as e:
+        st.error(f"❌ Error cargando imagen: {e}")
+        return False
+
 def mostrar_logo():
     st.markdown("""
     <div style="text-align: center; background: white; padding: 0.5rem; border-radius: 15px; margin: 0.5rem 0;">
@@ -379,24 +402,28 @@ def es_cumpleanos_hoy(fecha_cumpleanos):
 # ==================================================
 # COMPONENTES INTERFAZ MÓVIL
 # ==================================================
-def mostrar_producto_movil(producto, puntos_usuario, uid):
+def mostrar_producto_horizontal(producto, puntos_usuario, uid):
+    """Mostrar producto en layout horizontal con imagen a la derecha"""
+    disponible = puntos_usuario >= producto['puntos']
+    
+    # Crear contenedor horizontal
     with st.container():
-        disponible = puntos_usuario >= producto['puntos']
+        col_texto, col_imagen = st.columns([3, 2])
         
-        st.markdown(f"""
-        <div class="mobile-card" style="opacity: {'1' if disponible else '0.7'}; text-align: center;">
-            <h4>{producto['nombre']}</h4>
-            <p>⭐ {producto['puntos']} puntos</p>
-            <p><small>Valor: ${producto['precio_original']:.2f}</small></p>
-            {"<span style='color: green; font-weight: bold;'>✅ DISPONIBLE</span>" if disponible else f"<span style='color: red;'>❌ Te faltan {producto['puntos'] - puntos_usuario} puntos</span>"}
-        </div>
-        """, unsafe_allow_html=True)
-        
-        cargar_imagen_movil(producto['imagen'], 250)
-        
-        if disponible:
-            col1, col2, col3 = st.columns([1, 2, 1])
-            with col2:
+        with col_texto:
+            st.markdown(f"""
+            <div class="product-card-horizontal" style="opacity: {'1' if disponible else '0.7'};">
+                <h4 style="color: #2C5530; margin-bottom: 5px;">{producto['nombre']}</h4>
+                <p style="color: #4A6741; margin: 2px 0;">⭐ <strong>{producto['puntos']} puntos</strong></p>
+                <p style="color: #666; margin: 2px 0; font-size: 0.9rem;">Valor: ${producto['precio_original']:.2f}</p>
+                <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 5px 0; font-weight: bold;">
+                    {"✅ DISPONIBLE" if disponible else f"❌ Te faltan {producto['puntos'] - puntos_usuario} puntos"}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Botón de canje
+            if disponible:
                 if st.button(f"🎁 Canjear {producto['puntos']} pts", 
                            key=f"canjear_{producto['nombre']}", 
                            use_container_width=True):
@@ -406,8 +433,14 @@ def mostrar_producto_movil(producto, puntos_usuario, uid):
                         st.session_state.profile = None
                         time.sleep(2)
                         st.rerun()
+        
+        with col_imagen:
+            # Imagen más pequeña a la derecha
+            cargar_imagen_producto(producto['imagen'], 120)
 
 def mostrar_menu_inferior(seleccion_actual):
+    """Menú inferior fijo funcional"""
+    # CSS mejorado para el menú
     st.markdown("""
     <style>
         .fixed-bottom-nav {
@@ -417,65 +450,94 @@ def mostrar_menu_inferior(seleccion_actual):
             right: 0;
             background: white;
             border-top: 2px solid #3DCCC5;
-            padding: 10px 0;
-            z-index: 999;
+            padding: 8px 0;
+            z-index: 9999;
             display: flex;
             justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
         .nav-item {
             text-align: center;
             padding: 5px;
             flex: 1;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
         .nav-item.active {
             color: #3DCCC5;
             font-weight: bold;
+            background: #f0f9f9;
+            border-radius: 10px;
+            margin: 0 5px;
         }
         .nav-icon {
-            font-size: 20px;
-            margin-bottom: 5px;
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+        .nav-text {
+            font-size: 12px;
+            font-weight: normal;
         }
         .main-content {
             margin-bottom: 80px;
+            padding-bottom: 10px;
         }
+        
+        /* Ocultar los botones de Streamlit pero mantener funcionalidad */
         .stButton > button {
+            width: 100%;
             border: none;
             background: transparent;
-            color: inherit;
+            color: transparent;
+            padding: 15px 0;
+            margin: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            cursor: pointer;
+        }
+        .nav-button-container {
+            position: relative;
+            flex: 1;
+            text-align: center;
         }
     </style>
     """, unsafe_allow_html=True)
     
+    # Mostrar menú visual
     menu_html = f"""
     <div class="fixed-bottom-nav">
         <div class="nav-item {'active' if seleccion_actual == 'Inicio' else ''}">
             <div class="nav-icon">🏠</div>
-            <div>Inicio</div>
+            <div class="nav-text">Inicio</div>
         </div>
         <div class="nav-item {'active' if seleccion_actual == 'Productos' else ''}">
             <div class="nav-icon">🎁</div>
-            <div>Productos</div>
+            <div class="nav-text">Productos</div>
         </div>
         <div class="nav-item {'active' if seleccion_actual == 'Perfil' else ''}">
             <div class="nav-icon">👤</div>
-            <div>Perfil</div>
+            <div class="nav-text">Perfil</div>
         </div>
     </div>
     """
     st.markdown(menu_html, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("🏠", key="nav_inicio", use_container_width=True):
+    # Botones invisibles superpuestos
+    cols = st.columns(3)
+    with cols[0]:
+        if st.button("Inicio", key="nav_inicio_hidden"):
             st.session_state.pagina_actual = "Inicio"
             st.rerun()
-    with col2:
-        if st.button("🎁", key="nav_productos", use_container_width=True):
+    with cols[1]:
+        if st.button("Productos", key="nav_productos_hidden"):
             st.session_state.pagina_actual = "Productos"
             st.rerun()
-    with col3:
-        if st.button("👤", key="nav_perfil", use_container_width=True):
+    with cols[2]:
+        if st.button("Perfil", key="nav_perfil_hidden"):
             st.session_state.pagina_actual = "Perfil"
             st.rerun()
 
@@ -490,7 +552,7 @@ st.set_page_config(
 )
 
 # ==================================================
-# CSS PERSONALIZADO
+# CSS PERSONALIZADO MEJORADO
 # ==================================================
 st.markdown("""
 <style>
@@ -513,6 +575,14 @@ st.markdown("""
         border: 2px solid #061B30;
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
+    .product-card-horizontal {
+        background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        margin: 0.5rem 0;
+        border: 2px solid #E9ECEF;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
     .point-card-mobile {
         background: linear-gradient(135deg, #46E0E0 0%, #46E0E0 100%);
         padding: 1.5rem;
@@ -533,7 +603,7 @@ st.markdown("""
     .stButton>button {
         width: 100%;
         background: linear-gradient(135deg, #135454 0%, #135454 100%);
-        color: black;
+        color: white;
         border: none;
         padding: 0.75rem;
         border-radius: 25px;
@@ -669,7 +739,8 @@ if st.session_state.user:
             
             st.subheader("☕ Nuestra Carta")
             for producto in PRODUCTOS:
-                mostrar_producto_movil(producto, puntos_usuario, uid)
+                mostrar_producto_horizontal(producto, puntos_usuario, uid)
+                st.markdown("---")
         
         elif st.session_state.pagina_actual == "Perfil":
             st.markdown("""
