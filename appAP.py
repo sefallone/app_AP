@@ -438,6 +438,90 @@ def mostrar_producto_horizontal(producto, puntos_usuario, uid):
             # Imagen más pequeña a la derecha
             cargar_imagen_producto(producto['imagen'], 120)
 
+def mostrar_menu_inferior():
+    """Menú inferior fijo que SÍ funciona en Streamlit"""
+    # CSS para el menú fijo
+    st.markdown("""
+    <style>
+    .bottom-nav-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 2px solid #3DCCC5;
+        padding: 10px 0;
+        z-index: 9999;
+        display: flex;
+        justify-content: space-around;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+    .nav-item {
+        text-align: center;
+        padding: 5px;
+        flex: 1;
+        border-radius: 10px;
+        margin: 0 5px;
+        transition: all 0.3s ease;
+    }
+    .nav-item.active {
+        background: #f0f9f9;
+        color: #3DCCC5;
+        font-weight: bold;
+    }
+    .nav-icon {
+        font-size: 20px;
+        margin-bottom: 2px;
+    }
+    .nav-text {
+        font-size: 12px;
+    }
+    .main-content {
+        margin-bottom: 80px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Determinar página activa
+    pagina_actual = st.session_state.get('pagina_actual', 'Inicio')
+    
+    # Mostrar menú visual
+    menu_html = f"""
+    <div class="bottom-nav-container">
+        <div class="nav-item {'active' if pagina_actual == 'Inicio' else ''}">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-text">Inicio</div>
+        </div>
+        <div class="nav-item {'active' if pagina_actual == 'Productos' else ''}">
+            <div class="nav-icon">🎁</div>
+            <div class="nav-text">Productos</div>
+        </div>
+        <div class="nav-item {'active' if pagina_actual == 'Perfil' else ''}">
+            <div class="nav-icon">👤</div>
+            <div class="nav-text">Perfil</div>
+        </div>
+    </div>
+    """
+    st.markdown(menu_html, unsafe_allow_html=True)
+    
+    # Botones invisibles de Streamlit para capturar clics
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        # Botón invisible para Inicio
+        if st.button("Inicio", key="nav_inicio_btn", help="Ir a Inicio"):
+            st.session_state.pagina_actual = "Inicio"
+            st.rerun()
+    with col2:
+        # Botón invisible para Productos  
+        if st.button("Productos", key="nav_productos_btn", help="Ir a Productos"):
+            st.session_state.pagina_actual = "Productos"
+            st.rerun()
+    with col3:
+        # Botón invisible para Perfil
+        if st.button("Perfil", key="nav_perfil_btn", help="Ir a Perfil"):
+            st.session_state.pagina_actual = "Perfil"
+            st.rerun()
+
 # ==================================================
 # CONFIGURACIÓN STREAMLIT
 # ==================================================
@@ -455,7 +539,6 @@ st.markdown("""
 <style>
     .main > div {
         padding: 0.5rem;
-        margin-bottom: 80px;
     }
     .hero-section {
         background: linear-gradient(135deg, #46E0E0 0%, #38C7C7 100%);
@@ -533,116 +616,27 @@ st.markdown("""
         margin: 0.5rem 0;
     }
     
-    /* MENÚ INFERIOR FIJO - CORREGIDO */
-    .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: white;
-        border-top: 2px solid #3DCCC5;
-        padding: 10px 0;
-        z-index: 9999;
-        display: flex;
-        justify-content: space-around;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    }
-    .nav-item {
-        text-align: center;
-        padding: 5px;
-        flex: 1;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    .nav-item.active {
-        color: #3DCCC5;
-        font-weight: bold;
-        background: #f0f9f9;
-        border-radius: 10px;
-        margin: 0 5px;
-    }
-    .nav-icon {
-        font-size: 20px;
-        margin-bottom: 2px;
-    }
-    .nav-text {
-        font-size: 12px;
-        font-weight: normal;
-    }
-    
-    /* Botones invisibles para el menú */
-    .nav-button {
-        position: absolute;
-        width: 33.33%;
-        height: 100%;
+    /* Ocultar los botones de navegación invisibles */
+    div[data-testid="column"] button {
         opacity: 0;
-        cursor: pointer;
+        position: absolute;
+        top: 0;
+        height: 60px;
+        width: 33.33%;
         z-index: 10000;
+        cursor: pointer;
     }
-    .nav-button-1 { left: 0; }
-    .nav-button-2 { left: 33.33%; }
-    .nav-button-3 { left: 66.66%; }
+    div[data-testid="column"]:nth-child(1) button {
+        left: 0;
+    }
+    div[data-testid="column"]:nth-child(2) button {
+        left: 33.33%;
+    }
+    div[data-testid="column"]:nth-child(3) button {
+        left: 66.66%;
+    }
 </style>
 """, unsafe_allow_html=True)
-
-def mostrar_menu_inferior(pagina_actual):
-    """Menú inferior fijo que SÍ funciona"""
-    # HTML del menú visual
-    menu_html = f"""
-    <div class="bottom-nav">
-        <div class="nav-item {'active' if pagina_actual == 'Inicio' else ''}">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-text">Inicio</div>
-        </div>
-        <div class="nav-item {'active' if pagina_actual == 'Productos' else ''}">
-            <div class="nav-icon">🎁</div>
-            <div class="nav-text">Productos</div>
-        </div>
-        <div class="nav-item {'active' if pagina_actual == 'Perfil' else ''}">
-            <div class="nav-icon">👤</div>
-            <div class="nav-text">Perfil</div>
-        </div>
-        
-        <!-- Botones invisibles superpuestos -->
-        <button class="nav-button nav-button-1" onclick="window.navigateTo('Inicio')"></button>
-        <button class="nav-button nav-button-2" onclick="window.navigateTo('Productos')"></button>
-        <button class="nav-button nav-button-3" onclick="window.navigateTo('Perfil')"></button>
-    </div>
-    
-    <script>
-        function navigateTo(pagina) {{
-            // Esta función se ejecutará cuando se haga clic en los botones
-            const event = new CustomEvent('navigate', {{ detail: {{ page: pagina }} }});
-            window.dispatchEvent(event);
-        }}
-        
-        // Escuchar el evento personalizado
-        window.addEventListener('navigate', function(event) {{
-            // Enviar el comando a Streamlit
-            window.parent.postMessage({{
-                type: 'streamlit:setComponentValue',
-                value: event.detail.page
-            }}, '*');
-        }});
-    </script>
-    """
-    
-    st.markdown(menu_html, unsafe_allow_html=True)
-    
-    # Usar componentes de Streamlit para capturar los clics
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button(" ", key="nav_inicio_btn"):
-            st.session_state.pagina_actual = "Inicio"
-            st.rerun()
-    with col2:
-        if st.button("  ", key="nav_productos_btn"):
-            st.session_state.pagina_actual = "Productos"
-            st.rerun()
-    with col3:
-        if st.button("   ", key="nav_perfil_btn"):
-            st.session_state.pagina_actual = "Perfil"
-            st.rerun()
 
 # ==================================================
 # MANEJO DE SESIÓN
@@ -670,7 +664,8 @@ if st.session_state.user:
     if perfil:
         puntos_usuario = perfil.get('puntos', 0)
         
-        # CONTENIDO PRINCIPAL
+        st.markdown('<div class="main-content">', unsafe_allow_html=True)
+        
         if st.session_state.pagina_actual == "Inicio":
             st.markdown("""
             <div class="hero-section">
@@ -776,8 +771,10 @@ if st.session_state.user:
                 st.session_state.pagina_actual = "Inicio"
                 st.rerun()
         
+        st.markdown('</div>', unsafe_allow_html=True)
+        
         # MENÚ INFERIOR - SIEMPRE AL FINAL
-        mostrar_menu_inferior(st.session_state.pagina_actual)
+        mostrar_menu_inferior()
 
 else:
     st.markdown("""
