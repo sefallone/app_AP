@@ -186,6 +186,20 @@ def mostrar_logo():
 # ==================================================
 # DISEÑO ESTÉTICO MEJORADO PARA PRODUCTOS
 # ==================================================
+def mostrar_hero_inicio():
+    """Sección hero mejorada para inicio"""
+    st.markdown("""
+    <div style="text-align: center; padding: 2rem 1rem; border-radius: 20px; margin-bottom: 2rem;">
+        <h1 style="color: #8B4513; font-size: 2rem; margin-bottom: 1rem; font-family: 'Georgia', serif;">
+            Bienvenido a Arte París
+        </h1>
+        <p style="color: #666; font-size: 1.1rem; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+            Donde cada taza de café y cada bocado cuentan una historia de tradición, 
+            pasión y el arte de lo bien hecho. Descubre experiencias únicas creadas especialmente para ti.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
 def mostrar_hero_productos():
     """Sección hero mejorada para productos"""
     st.markdown("""
@@ -276,6 +290,52 @@ def mostrar_producto_elegante(producto, puntos_usuario, uid):
         
         st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("---")
+
+def mostrar_producto_destacado(producto, puntos_usuario, uid):
+    """Versión compacta para productos destacados en inicio"""
+    disponible = puntos_usuario >= producto['puntos']
+    
+    with st.container():
+        col_imagen, col_texto = st.columns([2, 3])
+        
+        with col_imagen:
+            cargar_imagen_producto(producto['imagen'], 180)
+            
+            st.markdown(f"""
+            <div style="text-align: center; margin-top: 0.5rem;">
+                <span style="background: linear-gradient(135deg, #FFD700, #FFA500); 
+                            color: white; padding: 0.3rem 0.8rem; border-radius: 15px; 
+                            font-weight: bold; font-size: 0.8rem;">
+                    ⭐ {producto['puntos']} pts
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col_texto:
+            st.markdown(f"""
+            <div style="padding: 0.5rem;">
+                <h4 style="color: #8B4513; font-size: 1.1rem; margin-bottom: 0.3rem; 
+                          font-family: 'Georgia', serif;">
+                    {producto['nombre']}
+                </h4>
+                
+                <p style="color: #666; line-height: 1.4; font-size: 0.85rem; margin-bottom: 0.8rem;">
+                    {producto['descripcion']}
+                </p>
+                
+                <div style="background: #FFF8E1; padding: 0.6rem; border-radius: 8px; 
+                           border-left: 3px solid #FFA500;">
+                    <p style="color: #8B4513; margin: 0; font-size: 0.8rem;">
+                        <strong>Valor:</strong> ${producto['precio_original']:.2f}
+                    </p>
+                    <p style="color: {'#2E8B57' if disponible else '#FF6B6B'}; margin: 0.2rem 0 0 0; 
+                               font-weight: bold; font-size: 0.8rem;">
+                        {("✅ Disponible" if disponible else 
+                          f"❌ +{producto['puntos'] - puntos_usuario} pts")}
+                    </p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
 def mostrar_categorias_productos():
     """Selector de categorías estético"""
@@ -750,35 +810,57 @@ if st.session_state.user:
         st.markdown('<div class="main-content">', unsafe_allow_html=True)
         
         if st.session_state.pagina_actual == "Inicio":
-            st.markdown("""
-            <div class="hero-section">
-                <h3 style="margin: 0; font-style: italic;">Lo convertimos en Arte</h3>
-            </div>
-            """, unsafe_allow_html=True)
+            # HERO SECTION MEJORADA PARA INICIO
+            mostrar_hero_inicio()
             
             mostrar_logo()
             
+            # TARJETA DE PUNTOS ELEGANTE
             st.markdown(f"""
-            <div class="point-card-mobile">
-                <h3>⭐ Tus Puntos ArteParís</h3>
-                <h1 style="font-size: 3rem; margin: 0;">{puntos_usuario}</h1>
-                <p>Puntos acumulados</p>
+            <div style="background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); 
+                        padding: 1.5rem; border-radius: 15px; margin: 1rem 0; color: white; 
+                        text-align: center; box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);">
+                <h3 style="margin: 0; color: white;">⭐ Tus Puntos Arte París</h3>
+                <h1 style="font-size: 3rem; margin: 0.5rem 0; color: #FFD700;">{puntos_usuario}</h1>
+                <p style="margin: 0; opacity: 0.9;">Acumulados para vivir experiencias únicas</p>
             </div>
             """, unsafe_allow_html=True)
             
+            # OFERTA DE CUMPLEAÑOS
             fecha_cumpleanos = perfil.get('fecha_cumpleanos')
             if fecha_cumpleanos and es_cumpleanos_hoy(fecha_cumpleanos):
                 st.markdown(f"""
-                <div class="birthday-card">
-                    <h3>🎉 ¡Feliz Cumpleaños!</h3>
-                    <p>¡Hoy es tu día especial! Disfruta de regalos exclusivos</p>
+                <div style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+                            padding: 1.5rem; border-radius: 15px; margin: 1rem 0; 
+                            text-align: center; box-shadow: 0 8px 25px rgba(255, 165, 0, 0.3);">
+                    <h3 style="color: #8B4513; margin: 0;">🎉 ¡Feliz Cumpleaños!</h3>
+                    <p style="color: #8B4513; margin: 0.5rem 0;">Disfruta de regalos exclusivos en tu día especial</p>
+                    <div style="background: rgba(255,255,255,0.3); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+                        <h4 style="color: #8B4513; margin: 0;">🎁 Café especial + Dulce sorpresa</h4>
+                        <p style="color: #8B4513; margin: 0.5rem 0 0 0; font-weight: bold;">¡GRATIS para ti hoy!</p>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
             
-            st.subheader("☕ Nuestra Esencia")
+            # IMAGEN PRINCIPAL
+            st.markdown("""
+            <div style="text-align: center; margin: 2rem 0;">
+                <h3 style="color: #8B4513; font-family: 'Georgia', serif; margin-bottom: 1rem;">
+                    ☕ Nuestra Esencia
+                </h3>
+            </div>
+            """, unsafe_allow_html=True)
             cargar_imagen_movil(CONFIG_IMAGENES["hero"])
             
-            st.subheader("🚀 Acciones Rápidas")
+            # ACCIONES RÁPIDAS
+            st.markdown("""
+            <div style="text-align: center; margin: 2rem 0;">
+                <h3 style="color: #8B4513; font-family: 'Georgia', serif; margin-bottom: 1rem;">
+                    🚀 Acciones Rápidas
+                </h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("📥 Registrar Compra", use_container_width=True):
@@ -789,16 +871,29 @@ if st.session_state.user:
                     st.session_state.pagina_actual = "Productos"
                     st.rerun()
             
-            st.subheader("🌟 Destacados")
-            for producto in PRODUCTOS[:2]:
-                with st.container():
-                    st.markdown(f"""
-                    <div class="mobile-card">
-                        <h4 style="color: #2C5530;">{producto['nombre']}</h4>
-                        <p style="color: #4A6741;">⭐ {producto['puntos']} puntos</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    cargar_imagen_movil(producto['imagen'], 250)
+            # PRODUCTOS DESTACADOS
+            st.markdown("""
+            <div style="text-align: center; margin: 3rem 0 2rem 0;">
+                <h3 style="color: #8B4513; font-family: 'Georgia', serif; 
+                          border-bottom: 3px solid #F4A460; padding-bottom: 0.5rem;
+                          display: inline-block;">
+                    🌟 Productos Destacados
+                </h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Mostrar solo productos destacados en diseño compacto
+            productos_destacados = [p for p in PRODUCTOS if p.get('destacado', False)]
+            for producto in productos_destacados[:2]:  # Máximo 2 productos en inicio
+                mostrar_producto_destacado(producto, puntos_usuario, uid)
+                st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Botón para ver todos los productos
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                if st.button("📋 Ver Todos los Productos", use_container_width=True):
+                    st.session_state.pagina_actual = "Productos"
+                    st.rerun()
         
         elif st.session_state.pagina_actual == "Productos":
             # HERO SECTION MEJORADA
