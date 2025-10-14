@@ -1,14 +1,12 @@
-# ==================================================
-# IMPORTACIONES Y CONFIGURACIÓN INICIAL
-# ==================================================
 import streamlit as st
 import requests
 import json
 import time
 from datetime import datetime, date
-from streamlit_option_menu import option_menu
 from PIL import Image
 import os
+import qrcode
+import io
 
 # ==================================================
 # CONFIGURACIÓN FIREBASE
@@ -21,10 +19,9 @@ FIREBASE_CONFIG = {
 # ==================================================
 # CONFIGURACIÓN DE IMÁGENES LOCALES
 # ==================================================
-# NOTA: Coloca estos archivos en la misma carpeta que tu script
 CONFIG_IMAGENES = {
-    "logo": "LogoAP.jpg",           # Tu logo principal
-    "hero": "Cafe1.jpg",       # Imagen hero principal
+    "logo": "LogoAP.jpg",
+    "hero": "Cafe1.jpg",
     "productos": {
         "Milhojas": "Milhojas.jpg",
         "brazo": "Brazo.jpg",
@@ -39,7 +36,7 @@ CONFIG_IMAGENES = {
 }
 
 # ==================================================
-# DATOS DE PRODUCTOS CON IMÁGENES LOCALES
+# DATOS DE PRODUCTOS
 # ==================================================
 PRODUCTOS = [
     {
@@ -80,7 +77,7 @@ PRODUCTOS = [
 ]
 
 # ==================================================
-# OFERTAS ESPECIALES CON IMÁGENES LOCALES
+# OFERTAS ESPECIALES
 # ==================================================
 OFERTAS_ESPECIALES = [
     {
@@ -101,53 +98,50 @@ OFERTAS_ESPECIALES = [
 ]
 
 # ==================================================
-# FUNCIONES PARA MANEJO DE IMÁGENES LOCALES
+# FUNCIONES PARA IMÁGENES OPTIMIZADAS MÓVIL
 # ==================================================
-def cargar_imagen_local(ruta_imagen, ancho_maximo=800):  # Reducido de 400 a 300
-    """
-    Carga una imagen local y la muestra en Streamlit
-    Si no encuentra la imagen, muestra un placeholder
-    """
+def cargar_imagen_movil(ruta_imagen, ancho_maximo=300):
     try:
         if os.path.exists(ruta_imagen):
             imagen = Image.open(ruta_imagen)
-            
-            # Redimensionar manteniendo proporción
             ancho_original, alto_original = imagen.size
-            if ancho_original > ancho_maximo:
-                ratio = ancho_maximo / ancho_original
-                nuevo_alto = int(alto_original * ratio)
-                imagen = imagen.resize((ancho_maximo, nuevo_alto), Image.Resampling.LANCZOS)
+            ancho_objetivo = min(ancho_original, ancho_maximo)
             
-            st.image(imagen, use_container_width= True)  # Cambiado a False
+            if ancho_original > ancho_objetivo:
+                ratio = ancho_objetivo / ancho_original
+                nuevo_alto = int(alto_original * ratio)
+                imagen = imagen.resize((ancho_objetivo, nuevo_alto), Image.Resampling.LANCZOS)
+            
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                st.image(imagen, use_container_width=True)
             return True
         else:
-            st.error(f"❌ No se encontró: {ruta_imagen}")
-            # Placeholder más pequeño
-            st.image("https://via.placeholder.com/200x150/8B4513/FFFFFF?text=Imagen+No+Encontrada", 
-                    use_container_width=False)
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                st.image("https://via.placeholder.com/250x150/8B4513/FFFFFF?text=Imagen+No+Encontrada", 
+                        use_container_width=True)
             return False
     except Exception as e:
         st.error(f"❌ Error cargando imagen: {e}")
         return False
 
 def mostrar_logo():
-    """
-    Muestra el logo de la empresa
-    """
     st.markdown("""
     <div style="text-align: center; background: white; padding: 0.5rem; border-radius: 15px; margin: 0.5rem 0;">
     """, unsafe_allow_html=True)
     
     if os.path.exists(CONFIG_IMAGENES["logo"]):
         logo = Image.open(CONFIG_IMAGENES["logo"])
-        # Logo más pequeño - 200px de ancho máximo
         ancho_original, alto_original = logo.size
-        if ancho_original > 600:
-            ratio = 600 / ancho_original
+        if ancho_original > 400:
+            ratio = 400 / ancho_original
             nuevo_alto = int(alto_original * ratio)
-            logo = logo.resize((600, nuevo_alto), Image.Resampling.LANCZOS)
-        st.image(logo, use_container_width=False)
+            logo = logo.resize((400, nuevo_alto), Image.Resampling.LANCZOS)
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.image(logo, use_container_width=True)
     else:
         st.markdown("""
         <h2 style="color: #8B4513; margin: 0; font-family: 'Brush Script MT', cursive;">Arte París</h2>
@@ -157,10 +151,77 @@ def mostrar_logo():
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================================================
+# SISTEMA QR PARA COMPRAS SEGURAS
+# ==================================================
+def generar_codigo_qr_establecimiento():
+    timestamp = int(time.time()) // 300
+    codigo = f"ARTEPARIS_{timestamp}_{hash(str(timestamp)) % 10000:04d}"
+    
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(codigo)
+    qr.make(fit=True)
+    
+    img = qr.make_image(fill_color="#3DCCC5", back_color="white")
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    
+    return codigo, buffer
+
+def validar_codigo_qr(codigo_escaneado):
+    try:
+        timestamp_actual = int(time.time()) // 300
+        for i in range(2):
+            timestamp_valido = timestamp_actual - i
+            codigo_valido = f"ARTEPARIS_{timestamp_valido}_{hash(str(timestamp_valido)) % 10000:04d}"
+            if codigo_escaneado == codigo_valido:
+                return True
+        return False
+    except:
+        return False
+
+def mostrar_registro_compra_seguro(uid):
+    st.subheader("📥 Registrar Compra Segura")
+    
+    st.info("""
+    **🔒 Sistema Seguro de Registro**
+    - Acércate a la caja y pide que te escaneen el código QR
+    - El código cambia cada 5 minutos por seguridad
+    - Solo las compras verificadas en tienda acumulan puntos
+    """)
+    
+    codigo_actual, buffer_qr = generar_codigo_qr_establecimiento()
+    
+    st.markdown("### 📱 Código QR Actual")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image(buffer_qr, use_container_width=True)
+    st.caption(f"⏰ Válido por 5 minutos | Código: `{codigo_actual}`")
+    
+    st.markdown("---")
+    st.subheader("🏪 Escanear desde Establecimiento")
+    
+    with st.expander("🔍 Escanear Código del Cliente"):
+        codigo_escaneado = st.text_input("Ingresa el código QR escaneado:", placeholder="ARTEPARIS_12345_6789")
+        monto_compra = st.number_input("Monto de la compra ($)", min_value=0.0, step=0.5, value=0.0)
+        
+        if st.button("✅ Validar y Registrar Compra", use_container_width=True):
+            if validar_codigo_qr(codigo_escaneado) and monto_compra > 0:
+                puntos_ganados = registrar_ticket_compra(uid, monto_compra, f"QR_{int(time.time())}")
+                if puntos_ganados > 0:
+                    st.success(f"✅ ¡Compra verificada! {puntos_ganados} puntos añadidos")
+                    st.session_state.profile = None
+                    time.sleep(2)
+                    st.rerun()
+                else:
+                    st.error("❌ Error al registrar la compra")
+            else:
+                st.error("❌ Código QR inválido o expirado")
+
+# ==================================================
 # FUNCIONES FIREBASE
 # ==================================================
 def login_user(email, password):
-    """Login con Firebase"""
     try:
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_CONFIG['API_KEY']}"
         payload = json.dumps({
@@ -182,7 +243,6 @@ def login_user(email, password):
         raise Exception(f"Error en login: {str(e)}")
 
 def signup_user(email, password, nombre, fecha_cumpleanos=None, acepta_terminos=False, acepta_marketing=False):
-    """Registro de usuario"""
     try:
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_CONFIG['API_KEY']}"
         payload = json.dumps({
@@ -207,7 +267,6 @@ def signup_user(email, password, nombre, fecha_cumpleanos=None, acepta_terminos=
         raise Exception(f"Error en registro: {str(e)}")
 
 def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_points=0, acepta_terminos=False, acepta_marketing=False):
-    """Guardar perfil en Firestore"""
     try:
         url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
         
@@ -235,7 +294,6 @@ def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_point
         return False
 
 def get_profile_via_rest(uid):
-    """Obtener perfil del usuario"""
     try:
         url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
         response = requests.get(url, timeout=10)
@@ -269,7 +327,6 @@ def get_profile_via_rest(uid):
         return None
 
 def update_points_via_rest(uid, delta):
-    """Actualizar puntos del usuario"""
     try:
         perfil = get_profile_via_rest(uid)
         if perfil:
@@ -290,7 +347,6 @@ def update_points_via_rest(uid, delta):
         return 0
 
 def registrar_ticket_compra(uid, monto_compra, numero_ticket):
-    """Registrar ticket de compra"""
     try:
         perfil = get_profile_via_rest(uid)
         if perfil:
@@ -315,11 +371,113 @@ def registrar_ticket_compra(uid, monto_compra, numero_ticket):
         return 0
 
 def es_cumpleanos_hoy(fecha_cumpleanos):
-    """Verificar si hoy es cumpleaños"""
     if not fecha_cumpleanos:
         return False
     hoy = date.today()
     return fecha_cumpleanos.month == hoy.month and fecha_cumpleanos.day == hoy.day
+
+# ==================================================
+# COMPONENTES INTERFAZ MÓVIL
+# ==================================================
+def mostrar_producto_movil(producto, puntos_usuario, uid):
+    with st.container():
+        disponible = puntos_usuario >= producto['puntos']
+        
+        st.markdown(f"""
+        <div class="mobile-card" style="opacity: {'1' if disponible else '0.7'}; text-align: center;">
+            <h4>{producto['nombre']}</h4>
+            <p>⭐ {producto['puntos']} puntos</p>
+            <p><small>Valor: ${producto['precio_original']:.2f}</small></p>
+            {"<span style='color: green; font-weight: bold;'>✅ DISPONIBLE</span>" if disponible else f"<span style='color: red;'>❌ Te faltan {producto['puntos'] - puntos_usuario} puntos</span>"}
+        </div>
+        """, unsafe_allow_html=True)
+        
+        cargar_imagen_movil(producto['imagen'], 250)
+        
+        if disponible:
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                if st.button(f"🎁 Canjear {producto['puntos']} pts", 
+                           key=f"canjear_{producto['nombre']}", 
+                           use_container_width=True):
+                    nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
+                    if nuevos_puntos >= 0:
+                        st.success(f"¡Canjeado! {producto['nombre']}")
+                        st.session_state.profile = None
+                        time.sleep(2)
+                        st.rerun()
+
+def mostrar_menu_inferior(seleccion_actual):
+    st.markdown("""
+    <style>
+        .fixed-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 2px solid #3DCCC5;
+            padding: 10px 0;
+            z-index: 999;
+            display: flex;
+            justify-content: space-around;
+        }
+        .nav-item {
+            text-align: center;
+            padding: 5px;
+            flex: 1;
+            cursor: pointer;
+        }
+        .nav-item.active {
+            color: #3DCCC5;
+            font-weight: bold;
+        }
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .main-content {
+            margin-bottom: 80px;
+        }
+        .stButton > button {
+            border: none;
+            background: transparent;
+            color: inherit;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    menu_html = f"""
+    <div class="fixed-bottom-nav">
+        <div class="nav-item {'active' if seleccion_actual == 'Inicio' else ''}">
+            <div class="nav-icon">🏠</div>
+            <div>Inicio</div>
+        </div>
+        <div class="nav-item {'active' if seleccion_actual == 'Productos' else ''}">
+            <div class="nav-icon">🎁</div>
+            <div>Productos</div>
+        </div>
+        <div class="nav-item {'active' if seleccion_actual == 'Perfil' else ''}">
+            <div class="nav-icon">👤</div>
+            <div>Perfil</div>
+        </div>
+    </div>
+    """
+    st.markdown(menu_html, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("🏠", key="nav_inicio", use_container_width=True):
+            st.session_state.pagina_actual = "Inicio"
+            st.rerun()
+    with col2:
+        if st.button("🎁", key="nav_productos", use_container_width=True):
+            st.session_state.pagina_actual = "Productos"
+            st.rerun()
+    with col3:
+        if st.button("👤", key="nav_perfil", use_container_width=True):
+            st.session_state.pagina_actual = "Perfil"
+            st.rerun()
 
 # ==================================================
 # CONFIGURACIÓN STREAMLIT
@@ -416,15 +574,16 @@ if "user" not in st.session_state:
     st.session_state.user = None
 if "profile" not in st.session_state:
     st.session_state.profile = None
+if "pagina_actual" not in st.session_state:
+    st.session_state.pagina_actual = "Inicio"
 
 # ==================================================
-# INTERFAZ PRINCIPAL - USUARIO LOGUEADO
+# INTERFAZ PRINCIPAL
 # ==================================================
 if st.session_state.user:
     user_info = st.session_state.user
     uid = user_info["localId"]
     
-    # Cargar perfil
     if st.session_state.profile is None:
         with st.spinner("Cargando tu perfil..."):
             st.session_state.profile = get_profile_via_rest(uid)
@@ -434,25 +593,9 @@ if st.session_state.user:
     if perfil:
         puntos_usuario = perfil.get('puntos', 0)
         
-        # NAVEGACIÓN MÓVIL
-        with st.container():
-            selected = option_menu(
-                menu_title=None,
-                options=["Inicio", "Productos", "Perfil"],
-                icons=["house", "gift", "person"],
-                menu_icon="cast",
-                default_index=0,
-                orientation="horizontal",
-                styles={
-                    "container": {"padding": "0!important", "background-color": "#f8f9fa"},
-                    "icon": {"color": "#4EDED7", "font-size": "12px"}, 
-                    "nav-link": {"font-size": "12px", "text-align": "center", "margin":"0px", "--hover-color": "#eee"},
-                    "nav-link-selected": {"background-color": "#4EDED7"},
-                }
-            )
+        st.markdown('<div class="main-content">', unsafe_allow_html=True)
         
-        # PÁGINA DE INICIO
-        if selected == "Inicio":
+        if st.session_state.pagina_actual == "Inicio":
             st.markdown("""
             <div class="hero-section">
                 <h3 style="margin: 0; font-style: italic;">Lo convertimos en Arte</h3>
@@ -461,7 +604,6 @@ if st.session_state.user:
             
             mostrar_logo()
             
-            # Tarjeta de puntos
             st.markdown(f"""
             <div class="point-card-mobile">
                 <h3>⭐ Tus Puntos ArteParís</h3>
@@ -470,7 +612,6 @@ if st.session_state.user:
             </div>
             """, unsafe_allow_html=True)
             
-            # Verificar cumpleaños
             fecha_cumpleanos = perfil.get('fecha_cumpleanos')
             if fecha_cumpleanos and es_cumpleanos_hoy(fecha_cumpleanos):
                 st.markdown(f"""
@@ -480,21 +621,20 @@ if st.session_state.user:
                 </div>
                 """, unsafe_allow_html=True)
             
-            # Imagen principal local
             st.subheader("☕ Nuestra Esencia")
-            cargar_imagen_local(CONFIG_IMAGENES["hero"])
+            cargar_imagen_movil(CONFIG_IMAGENES["hero"])
             
-            # Acciones rápidas
             st.subheader("🚀 Acciones Rápidas")
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("📥 Registrar Compra", use_container_width=True):
-                    st.info("📍 Ve a 'Perfil' para registrar tus compras")
+                    st.session_state.pagina_actual = "Perfil"
+                    st.rerun()
             with col2:
                 if st.button("🎁 Canjear Puntos", use_container_width=True):
-                    st.info("📍 Ve a 'Productos' para canjear tus puntos")
+                    st.session_state.pagina_actual = "Productos"
+                    st.rerun()
             
-            # Productos destacados
             st.subheader("🌟 Destacados")
             for producto in PRODUCTOS[:2]:
                 with st.container():
@@ -504,10 +644,9 @@ if st.session_state.user:
                         <p>⭐ {producto['puntos']} puntos</p>
                     </div>
                     """, unsafe_allow_html=True)
-                    cargar_imagen_local(producto['imagen'], 250)
+                    cargar_imagen_movil(producto['imagen'], 250)
         
-        # PÁGINA DE PRODUCTOS
-        elif selected == "Productos":
+        elif st.session_state.pagina_actual == "Productos":
             st.markdown("""
             <div style="text-align: center; margin-bottom: 1rem;">
                 <h2 style="color: #3DCCC5; margin: 0;">🎁 Productos Arte París</h2>
@@ -515,8 +654,7 @@ if st.session_state.user:
             </div>
             """, unsafe_allow_html=True)
             
-            # Ofertas de cumpleaños
-            fecha_cumpleanos = perfil.get('fecha_cumpleaños')
+            fecha_cumpleanos = perfil.get('fecha_cumpleanos')
             if fecha_cumpleanos and es_cumpleanos_hoy(fecha_cumpleanos):
                 st.markdown(f"""
                 <div class="birthday-card">
@@ -525,38 +663,15 @@ if st.session_state.user:
                     <h4>¡GRATIS hoy!</h4>
                 </div>
                 """, unsafe_allow_html=True)
-                cargar_imagen_local(OFERTAS_ESPECIALES[0]['imagen'], 250)
+                cargar_imagen_movil(OFERTAS_ESPECIALES[0]['imagen'], 250)
                 if st.button("🎁 Reclamar Mi Regalo", use_container_width=True):
                     st.success("¡Regalo reclamado! Muestra esta pantalla en tienda")
             
-            # Todos los productos
             st.subheader("☕ Nuestra Carta")
             for producto in PRODUCTOS:
-                with st.container():
-                    disponible = puntos_usuario >= producto['puntos']
-                    st.markdown(f"""
-                    <div class="mobile-card" style="opacity: {'1' if disponible else '0.7'}">
-                        <h4>{producto['nombre']}</h4>
-                        <p>⭐ {producto['puntos']} puntos</p>
-                        <p><small>Valor: ${producto['precio_original']}</small></p>
-                        {"✅ DISPONIBLE" if disponible else f"❌ Te faltan {producto['puntos'] - puntos_usuario} puntos"}
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    cargar_imagen_local(producto['imagen'], 250)
-                    
-                    if disponible and st.button(f"Canjear {producto['puntos']} pts", 
-                                              key=f"canjear_{producto['nombre']}", 
-                                              use_container_width=True):
-                        nuevos_puntos = update_points_via_rest(uid, -producto['puntos'])
-                        if nuevos_puntos >= 0:
-                            st.success(f"¡Canjeado! {producto['nombre']}")
-                            st.session_state.profile = None
-                            time.sleep(2)
-                            st.rerun()
+                mostrar_producto_movil(producto, puntos_usuario, uid)
         
-        # PÁGINA DE PERFIL
-        elif selected == "Perfil":
+        elif st.session_state.pagina_actual == "Perfil":
             st.markdown("""
             <div style="text-align: center; margin-bottom: 1rem;">
                 <h2 style="color: #3DCCC5; margin: 0;">👤 Tu Perfil</h2>
@@ -564,7 +679,6 @@ if st.session_state.user:
             </div>
             """, unsafe_allow_html=True)
             
-            # Información del perfil
             st.markdown(f"""
             <div class="mobile-card">
                 <h4>👋 Hola, {perfil['nombre']}</h4>
@@ -576,50 +690,28 @@ if st.session_state.user:
             </div>
             """, unsafe_allow_html=True)
             
-            # Registrar compra
-            st.subheader("📥 Registrar Nueva Compra")
-            with st.form("compra_form"):
-                numero_ticket = st.text_input("Número de Ticket", placeholder="TKT-001")
-                monto_compra = st.number_input("Monto de la Compra ($)", min_value=0.0, step=0.5, value=0.0)
-                
-                if st.form_submit_button("📥 Registrar Compra y Ganar Puntos", use_container_width=True):
-                    if numero_ticket.strip() and monto_compra > 0:
-                        puntos_ganados = registrar_ticket_compra(uid, monto_compra, numero_ticket)
-                        if puntos_ganados > 0:
-                            st.success(f"✅ ¡Compra registrada! Ganaste {puntos_ganados} puntos")
-                            st.session_state.profile = None
-                            time.sleep(2)
-                            st.rerun()
-                        else:
-                            st.error("❌ Error al registrar la compra")
-                    else:
-                        st.warning("⚠️ Ingresa un número de ticket y monto válidos")
+            mostrar_registro_compra_seguro(uid)
             
-            # Cerrar sesión
             st.markdown("---")
             if st.button("🚪 Cerrar Sesión", use_container_width=True):
                 st.session_state.user = None
                 st.session_state.profile = None
+                st.session_state.pagina_actual = "Inicio"
                 st.rerun()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        mostrar_menu_inferior(st.session_state.pagina_actual)
 
-# ==================================================
-# INTERFAZ DE LOGIN - NO LOGUEADO
-# ==================================================
 else:
-    # Hero Section
     st.markdown("""
     <div class="hero-section">
         <h3 style="margin: 0; font-style: italic;">Bienvenido a Arte Paris Deli Café</h3>
     </div>
     """, unsafe_allow_html=True)
     
-    # Logo
     mostrar_logo()
+    cargar_imagen_movil(CONFIG_IMAGENES["hero"], 350)
     
-    # Imagen principal local
-    cargar_imagen_local(CONFIG_IMAGENES["hero"], 350)
-    
-    # Tabs de login/registro
     tab1, tab2 = st.tabs(["🚀 Ingresar", "📝 Crear Cuenta"])
     
     with tab1:
@@ -651,46 +743,38 @@ else:
             email = st.text_input("📧 Email", placeholder="tu@email.com")
             password = st.text_input("🔒 Contraseña", type="password", placeholder="Crea una contraseña")
             fecha_cumpleanos = st.date_input(
-                "🎂 Fecha de Cumpleaños (opcional) - Añade tu cumpleaños para que podamos felicitarte y enviarte un vale de regalo en tu cumpleaños.",
+                "🎂 Fecha de Cumpleaños (opcional)",
                 value=None,
                 min_value=date(1900, 1, 1),
-                max_value=date.today(),
-                help="¡Recibe regalos especiales en tu cumpleaños!"
+                max_value=date.today()
             )
             
-            # SECCIÓN DE TÉRMINOS Y CONDICIONES (NUEVO)
             st.markdown("---")
             st.markdown("### 📧 Comunicaciones y Términos")
             
-            # Checkbox para marketing
             st.markdown('<div class="checkbox-container">', unsafe_allow_html=True)
             acepta_marketing = st.checkbox(
-                "**Sí, quiero recibir información sobre ofertas exclusivas, anuncios y nuevos productos de Arte París, así como sobre los productos más adaptados a mi cuenta y mi actividad.**",
+                "**Sí, quiero recibir información sobre ofertas exclusivas, anuncios y nuevos productos de Arte París**",
                 value=False
             )
             st.markdown("""
             <div class="terms-section">
-                <small><strong>Mantente al tanto.</strong> El e-mail es una gran forma de estar al día de las ofertas y novedades de Arte París, incluido el acceso anticipado a nuestros últimos lanzamientos de bebidas.</small><br><br>
-                <small>Puedes anular tu suscripción en cualquier momento. Por favor, consulta nuestra Declaración de privacidad o Contacta con nosotros.</small>
+                <small><strong>Mantente al tanto.</strong> El e-mail es una gran forma de estar al día de las ofertas y novedades de Arte París.</small>
             </div>
             """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # Checkbox para términos y condiciones
             st.markdown('<div class="checkbox-container">', unsafe_allow_html=True)
             acepta_terminos = st.checkbox(
                 "**Acepto las Condiciones de Uso y la Declaración de Privacidad**",
                 value=False
             )
             
-            # Enlaces a términos
             st.markdown("""
             <div style="text-align: center; margin-top: 0.5rem;">
                 <small>
                     <a href="#" style="color: #46E0E0; text-decoration: none; margin: 0 0.5rem;">Condiciones de uso</a> • 
-                    <a href="#" style="color: #46E0E0; text-decoration: none; margin: 0 0.5rem;">Ayuda</a> • 
-                    <a href="#" style="color: #46E0E0; text-decoration: none; margin: 0 0.5rem;">Política de Privacidad</a> • 
-                    <a href="#" style="color: #46E0E0; text-decoration: none; margin: 0 0.5rem;">Términos y Condiciones</a>
+                    <a href="#" style="color: #46E0E0; text-decoration: none; margin: 0 0.5rem;">Política de Privacidad</a>
                 </small>
             </div>
             """, unsafe_allow_html=True)
@@ -699,22 +783,13 @@ else:
             if st.form_submit_button("Unirme a Arte París", use_container_width=True):
                 if nombre and email and password:
                     if not acepta_terminos:
-                        st.error("❌ Debes aceptar las Condiciones de Uso y la Declaración de Privacidad para continuar.")
+                        st.error("❌ Debes aceptar las Condiciones de Uso")
                     else:
                         try:
                             user_info = signup_user(email, password, nombre, fecha_cumpleanos, acepta_terminos, acepta_marketing)
                             st.session_state.user = user_info
                             st.balloons()
-                            st.success("""
-                            🎉 ¡Bienvenido al Club Arte París!
-                            
-                            **🎁 Recibiste 10 puntos de bienvenida**
-                            
-                            Ahora puedes:
-                            - Canjear puntos por experiencias únicas
-                            - Acceder a ofertas exclusivas  
-                            - Recibir regalos en tu cumpleaños
-                            """)
+                            st.success("🎉 ¡Bienvenido al Club Arte París! Recibiste 10 puntos de bienvenida")
                             time.sleep(3)
                             st.rerun()
                         except Exception as e:
@@ -722,7 +797,6 @@ else:
                 else:
                     st.warning("Por favor completa los campos obligatorios")
     
-    # Beneficios
     st.markdown("---")
     st.subheader("⭐ Beneficios Exclusivos")
     
@@ -746,9 +820,6 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-# ==================================================
-# FOOTER
-# ==================================================
 st.markdown("---")
 st.markdown(
     '<div style="text-align: center; color: #666; font-size: 0.8rem; padding: 1rem;">'
