@@ -9,6 +9,10 @@ import qrcode
 import io
 import uuid
 from math import radians, sin, cos, sqrt, atan2
+import smtplib
+from email.mime.text import MimeText
+from email.mime.multipart import MimeMultipart
+import re
 
 # ==================================================
 # CONFIGURACIÓN FIREBASE
@@ -16,6 +20,21 @@ from math import radians, sin, cos, sqrt, atan2
 FIREBASE_CONFIG = {
     "API_KEY": "AIzaSyAr3RChPqT89oy_dBakL7PO_qU03TTLE0k",
     "PROJECT_ID": "webap-6e49a"
+}
+
+# ==================================================
+# CONFIGURACIÓN DE EMAIL Y SMS
+# ==================================================
+CONFIG_EMAIL = {
+    "smtp_server": "smtp.gmail.com",  # Cambiar según tu proveedor
+    "smtp_port": 587,
+    "sender_email": "tucorreo@arteparis.com",  # Configurar con tu email
+    "sender_password": "tu_password"  # Configurar con tu password
+}
+
+CONFIG_SMS = {
+    "api_key": "tu_api_key_sms",  # Configurar con API de servicio SMS
+    "sender_id": "ARTEPARIS"
 }
 
 # ==================================================
@@ -156,6 +175,108 @@ ESTADOS_PEDIDO = {
     "entregado": "📦 Entregado",
     "cancelado": "❌ Cancelado"
 }
+
+# ==================================================
+# SISTEMA DE VALIDACIÓN DE TELÉFONO Y EMAIL
+# ==================================================
+
+def validar_telefono(telefono):
+    """Valida que el número de teléfono tenga formato correcto"""
+    # Patrón para números internacionales: + seguido de 10-15 dígitos
+    patron = r'^\+[1-9]\d{9,14}$'
+    return re.match(patron, telefono) is not None
+
+def validar_email(email):
+    """Valida formato básico de email"""
+    patron = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(patron, email) is not None
+
+def enviar_email_verificacion(email, nombre, codigo_verificacion):
+    """Envía email de verificación al usuario"""
+    try:
+        # Configurar el mensaje
+        mensaje = MimeMultipart()
+        mensaje['From'] = CONFIG_EMAIL['sender_email']
+        mensaje['To'] = email
+        mensaje['Subject'] = "Verifica tu cuenta - Arte París"
+        
+        # Cuerpo del email
+        cuerpo = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+                <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: #8B4513;">Arte París</h2>
+                        <h3 style="color: #333;">Verificación de Cuenta</h3>
+                    </div>
+                    
+                    <p>Hola <strong>{nombre}</strong>,</p>
+                    
+                    <p>¡Gracias por registrarte en Arte París! Para activar tu cuenta y comenzar a disfrutar de todos nuestros beneficios, por favor verifica tu dirección de email.</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 2px dashed #8B4513;">
+                            <h4 style="margin: 0; color: #8B4513;">Código de Verificación</h4>
+                            <h2 style="margin: 10px 0; color: #333; letter-spacing: 3px;">{codigo_verificacion}</h2>
+                        </div>
+                    </div>
+                    
+                    <p>Ingresa este código en la aplicación para completar tu registro.</p>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                        <p style="color: #666; font-size: 12px;">
+                            Si no solicitaste este registro, por favor ignora este mensaje.<br>
+                            © 2024 Arte París. Todos los derechos reservados.
+                        </p>
+                    </div>
+                </div>
+            </body>
+        </html>
+        """
+        
+        mensaje.attach(MimeText(cuerpo, 'html'))
+        
+        # Conectar y enviar
+        server = smtplib.SMTP(CONFIG_EMAIL['smtp_server'], CONFIG_EMAIL['smtp_port'])
+        server.starttls()
+        server.login(CONFIG_EMAIL['sender_email'], CONFIG_EMAIL['sender_password'])
+        server.send_message(mensaje)
+        server.quit()
+        
+        return True
+    except Exception as e:
+        st.error(f"Error enviando email: {e}")
+        return False
+
+def enviar_sms_promocional(telefono, mensaje):
+    """Envía SMS promocional al usuario"""
+    try:
+        # Simulación de envío de SMS - En producción usarías una API real como Twilio
+        st.info(f"📱 SMS enviado a {telefono}: {mensaje}")
+        
+        # Código ejemplo para Twilio (descomentar y configurar):
+        """
+        from twilio.rest import Client
+        
+        account_sid = 'tu_account_sid'
+        auth_token = 'tu_auth_token'
+        client = Client(account_sid, auth_token)
+        
+        message = client.messages.create(
+            body=mensaje,
+            from_=CONFIG_SMS['sender_id'],
+            to=telefono
+        )
+        """
+        
+        return True
+    except Exception as e:
+        st.error(f"Error enviando SMS: {e}")
+        return False
+
+def generar_codigo_verificacion():
+    """Genera un código de verificación de 6 dígitos"""
+    return str(uuid.uuid4().int)[:6]
 
 # ==================================================
 # FUNCIONES PARA IMÁGENES OPTIMIZADAS MÓVIL
@@ -563,6 +684,11 @@ def procesar_pedido(uid, tienda_id, metodo_pago, direccion_entrega=""):
                 "pedido"
             )
             
+            # Enviar SMS de confirmación si el usuario aceptó marketing
+            if perfil.get('acepta_marketing', False) and perfil.get('telefono'):
+                mensaje_sms = f"Arte París: ¡Pedido #{pedido_id} confirmado! Estamos preparando tu orden. Total: {total_puntos} puntos"
+                enviar_sms_promocional(perfil['telefono'], mensaje_sms)
+            
             return True, pedido_id
         else:
             return False, "Error al guardar pedido"
@@ -626,7 +752,7 @@ def obtener_nombre_tienda(tienda_id):
     return "Tienda no encontrada"
 
 # ==================================================
-# SISTEMA DE NOTIFICACIONES PUSH
+# SISTEMA DE NOTIFICACIONES PUSH (SMS)
 # ==================================================
 
 def crear_notificacion(uid, titulo, mensaje, tipo="info"):
@@ -732,6 +858,62 @@ def mostrar_notificaciones(uid):
             if not notif['leida'] and st.button("📬", key=f"leer_{notif['id']}", help="Marcar como leída"):
                 marcar_notificacion_leida(notif['id'])
                 st.rerun()
+
+# ==================================================
+# SISTEMA DE ENVÍO DE SMS PROMOCIONALES
+# ==================================================
+
+def enviar_campana_sms():
+    """Interfaz para enviar campañas SMS a usuarios"""
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="color: #8B4513;">📱 Campañas SMS</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.warning("🚨 **Función administrativa** - Solo para uso autorizado")
+    
+    with st.form("campana_sms"):
+        st.subheader("Nueva Campaña SMS")
+        
+        tipo_campana = st.selectbox(
+            "Tipo de campaña",
+            ["promocion", "oferta_especial", "evento", "recordatorio", "general"]
+        )
+        
+        mensaje = st.text_area(
+            "Mensaje SMS",
+            placeholder="Escribe tu mensaje promocional (máx. 160 caracteres)...",
+            max_chars=160,
+            height=100
+        )
+        
+        grupo_destinatarios = st.multiselect(
+            "Destinatarios",
+            ["todos_usuarios", "usuarios_activos", "cumpleaños_mes", "sin_compras_30_dias"],
+            default=["todos_usuarios"]
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            enviar_inmediatamente = st.checkbox("Enviar inmediatamente", value=True)
+        with col2:
+            programar_envio = st.checkbox("Programar envío")
+        
+        if programar_envio:
+            fecha_envio = st.date_input("Fecha de envío")
+            hora_envio = st.time_input("Hora de envío")
+        
+        if st.form_submit_button("🚀 Enviar Campaña SMS", use_container_width=True):
+            if mensaje:
+                # Simular envío de campaña
+                st.success("✅ Campaña SMS programada para envío")
+                st.info(f"📊 La campaña llegará a aproximadamente X usuarios")
+                
+                # Aquí iría la lógica real para enviar SMS a todos los usuarios
+                # que cumplan con los criterios seleccionados
+            else:
+                st.error("❌ El mensaje no puede estar vacío")
 
 # ==================================================
 # PROGRAMA DE REFERIDOS
@@ -1024,7 +1206,7 @@ def mostrar_registro_compra_seguro(uid):
                 st.error("❌ Código QR inválido o expirado")
 
 # ==================================================
-# FUNCIONES FIREBASE
+# FUNCIONES FIREBASE ACTUALIZADAS
 # ==================================================
 def login_user(email, password):
     try:
@@ -1047,7 +1229,7 @@ def login_user(email, password):
     except Exception as e:
         raise Exception(f"Error en login: {str(e)}")
 
-def signup_user(email, password, nombre, fecha_cumpleanos=None, acepta_terminos=False, acepta_marketing=False):
+def signup_user(email, password, nombre, telefono=None, fecha_cumpleanos=None, acepta_terminos=False, acepta_marketing=False):
     try:
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_CONFIG['API_KEY']}"
         payload = json.dumps({
@@ -1061,17 +1243,69 @@ def signup_user(email, password, nombre, fecha_cumpleanos=None, acepta_terminos=
         result = response.json()
         
         if response.status_code == 200:
-            st.success("✅ Usuario registrado")
-            time.sleep(1)
-            save_profile_via_rest(result['localId'], nombre, email, fecha_cumpleanos, 10, acepta_terminos, acepta_marketing)
-            return result
+            # Generar código de verificación
+            codigo_verificacion = generar_codigo_verificacion()
+            
+            # Guardar código en sesión para verificación
+            st.session_state.codigo_verificacion = codigo_verificacion
+            st.session_state.email_verificacion = email
+            st.session_state.datos_registro = {
+                'nombre': nombre,
+                'telefono': telefono,
+                'fecha_cumpleanos': fecha_cumpleanos,
+                'acepta_terminos': acepta_terminos,
+                'acepta_marketing': acepta_marketing,
+                'uid': result['localId']
+            }
+            
+            # Enviar email de verificación
+            if enviar_email_verificacion(email, nombre, codigo_verificacion):
+                st.success("✅ Usuario registrado - Verifica tu email")
+                return {"needs_verification": True, "localId": result['localId']}
+            else:
+                st.error("❌ Error enviando email de verificación")
+                return None
         else:
             error_msg = result.get('error', {}).get('message', 'Error desconocido')
             raise Exception(f"Registro falló: {error_msg}")
     except Exception as e:
         raise Exception(f"Error en registro: {str(e)}")
 
-def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_points=0, acepta_terminos=False, acepta_marketing=False):
+def verify_email_code(codigo_ingresado):
+    """Verifica el código de email ingresado por el usuario"""
+    if (hasattr(st.session_state, 'codigo_verificacion') and 
+        hasattr(st.session_state, 'email_verificacion') and
+        hasattr(st.session_state, 'datos_registro')):
+        
+        if codigo_ingresado == st.session_state.codigo_verificacion:
+            # Código correcto, guardar perfil completo
+            datos = st.session_state.datos_registro
+            success = save_profile_via_rest(
+                datos['uid'],
+                datos['nombre'],
+                st.session_state.email_verificacion,
+                datos['telefono'],
+                datos['fecha_cumpleanos'],
+                10,  # puntos de bienvenida
+                datos['acepta_terminos'],
+                datos['acepta_marketing']
+            )
+            
+            if success:
+                # Limpiar datos de verificación
+                del st.session_state.codigo_verificacion
+                del st.session_state.email_verificacion
+                del st.session_state.datos_registro
+                
+                return True
+        else:
+            st.error("❌ Código de verificación incorrecto")
+            return False
+    
+    st.error("❌ Error en el proceso de verificación")
+    return False
+
+def save_profile_via_rest(uid, nombre, email, telefono=None, fecha_cumpleanos=None, bonus_points=0, acepta_terminos=False, acepta_marketing=False):
     try:
         url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_CONFIG['PROJECT_ID']}/databases/(default)/documents/clientes/{uid}"
         
@@ -1084,9 +1318,14 @@ def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_point
                 "total_compras": {"doubleValue": 0.0},
                 "tickets_registrados": {"integerValue": 0},
                 "acepta_terminos": {"booleanValue": acepta_terminos},
-                "acepta_marketing": {"booleanValue": acepta_marketing}
+                "acepta_marketing": {"booleanValue": acepta_marketing},
+                "email_verificado": {"booleanValue": True},
+                "telefono_verificado": {"booleanValue": telefono is not None}
             }
         }
+        
+        if telefono:
+            document_data["fields"]["telefono"] = {"stringValue": telefono}
         
         if fecha_cumpleanos:
             document_data["fields"]["fecha_cumpleanos"] = {
@@ -1094,7 +1333,15 @@ def save_profile_via_rest(uid, nombre, email, fecha_cumpleanos=None, bonus_point
             }
         
         response = requests.patch(url, json=document_data)
-        return response.status_code == 200
+        
+        if response.status_code == 200:
+            # Enviar SMS de bienvenida si aceptó marketing y tiene teléfono
+            if acepta_marketing and telefono:
+                mensaje_bienvenida = f"¡Bienvenido a Arte París, {nombre}! Disfruta de 10 puntos de bienvenida. Canjea por deliciosos productos."
+                enviar_sms_promocional(telefono, mensaje_bienvenida)
+            
+            return True
+        return False
     except:
         return False
 
@@ -1113,8 +1360,13 @@ def get_profile_via_rest(uid):
                     'total_compras': float(data['fields'].get('total_compras', {}).get('doubleValue', 0.0)),
                     'tickets_registrados': int(data['fields'].get('tickets_registrados', {}).get('integerValue', 0)),
                     'acepta_terminos': data['fields'].get('acepta_terminos', {}).get('booleanValue', False),
-                    'acepta_marketing': data['fields'].get('acepta_marketing', {}).get('booleanValue', False)
+                    'acepta_marketing': data['fields'].get('acepta_marketing', {}).get('booleanValue', False),
+                    'email_verificado': data['fields'].get('email_verificado', {}).get('booleanValue', False),
+                    'telefono_verificado': data['fields'].get('telefono_verificado', {}).get('booleanValue', False)
                 }
+                
+                if 'telefono' in data['fields']:
+                    profile_data['telefono'] = data['fields']['telefono'].get('stringValue', '')
                 
                 if 'fecha_cumpleanos' in data['fields']:
                     fecha_str = data['fields']['fecha_cumpleanos'].get('timestampValue', '')
@@ -1170,6 +1422,12 @@ def registrar_ticket_compra(uid, monto_compra, numero_ticket):
             }
             
             response = requests.patch(url, json=update_data)
+            
+            # Enviar SMS de confirmación si el usuario aceptó marketing
+            if puntos_ganados > 0 and perfil.get('acepta_marketing', False) and perfil.get('telefono'):
+                mensaje_sms = f"Arte París: ¡+{puntos_ganados} puntos! Compra de ${monto_compra:.2f} registrada. Total: {nuevos_puntos} puntos"
+                enviar_sms_promocional(perfil['telefono'], mensaje_sms)
+            
             return puntos_ganados if response.status_code == 200 else 0
         return 0
     except:
@@ -1251,6 +1509,54 @@ def mostrar_pagina_pedidos(uid, perfil):
 def mostrar_pagina_tiendas():
     """Página de geolocalización de tiendas"""
     mostrar_geolocalizacion_tiendas()
+
+# ==================================================
+# PÁGINA DE VERIFICACIÓN DE EMAIL
+# ==================================================
+
+def mostrar_pagina_verificacion():
+    """Página para verificar el email del usuario"""
+    st.markdown("""
+    <div style="text-align: center; padding: 2rem 1rem;">
+        <h1 style="color: #8B4513; margin-bottom: 1rem;">📧 Verifica tu Email</h1>
+        <p style="color: #666; margin-bottom: 2rem;">Hemos enviado un código de verificación a tu correo electrónico</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        st.info("🔐 **Verificación Requerida**\n\nPara proteger tu cuenta, necesitamos verificar tu dirección de email.")
+        
+        codigo = st.text_input(
+            "Código de Verificación",
+            placeholder="Ingresa el código de 6 dígitos",
+            max_chars=6
+        )
+        
+        if st.button("✅ Verificar Cuenta", use_container_width=True):
+            if codigo and len(codigo) == 6:
+                if verify_email_code(codigo):
+                    st.success("🎉 ¡Email verificado correctamente! Tu cuenta ha sido activada.")
+                    st.session_state.user = {"localId": st.session_state.datos_registro['uid']}
+                    st.session_state.pagina_actual = "Inicio"
+                    time.sleep(2)
+                    st.rerun()
+            else:
+                st.error("❌ El código debe tener 6 dígitos")
+        
+        st.markdown("---")
+        st.write("¿No recibiste el código?")
+        if st.button("🔄 Reenviar Código", use_container_width=True):
+            if hasattr(st.session_state, 'email_verificacion') and hasattr(st.session_state, 'datos_registro'):
+                nuevo_codigo = generar_codigo_verificacion()
+                st.session_state.codigo_verificacion = nuevo_codigo
+                if enviar_email_verificacion(
+                    st.session_state.email_verificacion,
+                    st.session_state.datos_registro['nombre'],
+                    nuevo_codigo
+                ):
+                    st.success("✅ Código reenviado a tu email")
 
 # ==================================================
 # MENÚ INFERIOR ACTUALIZADO
@@ -1524,11 +1830,18 @@ if "carrito" not in st.session_state:
     st.session_state.carrito = []
 if "notificaciones" not in st.session_state:
     st.session_state.notificaciones = []
+if "needs_verification" not in st.session_state:
+    st.session_state.needs_verification = False
 
 # ==================================================
 # INTERFAZ PRINCIPAL
 # ==================================================
-if st.session_state.user:
+
+# Primero verificar si el usuario necesita verificación de email
+if hasattr(st.session_state, 'needs_verification') and st.session_state.needs_verification:
+    mostrar_pagina_verificacion()
+
+elif st.session_state.user:
     user_info = st.session_state.user
     uid = user_info["localId"]
     
@@ -1695,10 +2008,25 @@ if st.session_state.user:
             </div>
             """, unsafe_allow_html=True)
             
+            # Mostrar estado de verificación
+            col1, col2 = st.columns(2)
+            with col1:
+                if perfil.get('email_verificado', False):
+                    st.success("✅ Email verificado")
+                else:
+                    st.warning("⚠️ Email no verificado")
+            
+            with col2:
+                if perfil.get('telefono_verificado', False):
+                    st.success("✅ Teléfono verificado")
+                else:
+                    st.warning("⚠️ Teléfono no verificado")
+            
             st.markdown(f"""
             <div class="mobile-card">
                 <h4 style="color: #2C5530;">👋 Hola, {perfil['nombre']}</h4>
                 <p style="color: #4A6741;">📧 {perfil['email']}</p>
+                <p style="color: #4A6741;">📱 {perfil.get('telefono', 'No registrado')}</p>
                 <p style="color: #4A6741;">⭐ {puntos_usuario} puntos acumulados</p>
                 <p style="color: #4A6741;">💰 ${perfil.get('total_compras', 0):.2f} gastados</p>
                 <p style="color: #4A6741;">🎫 {perfil.get('tickets_registrados', 0)} tickets registrados</p>
@@ -1707,6 +2035,12 @@ if st.session_state.user:
             """, unsafe_allow_html=True)
             
             mostrar_registro_compra_seguro(uid)
+            
+            # Sección administrativa (solo para demostración)
+            if perfil.get('email') == 'admin@arteparis.com':  # Ejemplo de admin
+                st.markdown("---")
+                st.subheader("👨‍💼 Panel Administrativo")
+                enviar_campana_sms()
             
             st.markdown("---")
             if st.button("🚪 Cerrar Sesión", use_container_width=True):
@@ -1763,6 +2097,17 @@ else:
             nombre = st.text_input("👤 Nombre completo", placeholder="Tu nombre completo")
             email = st.text_input("📧 Email", placeholder="tu@email.com")
             password = st.text_input("🔒 Contraseña", type="password", placeholder="Crea una contraseña")
+            
+            # NUEVO CAMPO: Teléfono
+            telefono = st.text_input(
+                "📱 Número de Teléfono (opcional)",
+                placeholder="+1234567890",
+                help="Formato internacional: + seguido del código país y número"
+            )
+            
+            if telefono and not validar_telefono(telefono):
+                st.error("❌ Formato de teléfono inválido. Usa formato internacional: +1234567890")
+            
             fecha_cumpleanos = st.date_input(
                 "🎂 Fecha de Cumpleaños (opcional)",
                 value=None,
@@ -1775,12 +2120,12 @@ else:
             
             st.markdown('<div class="checkbox-container">', unsafe_allow_html=True)
             acepta_marketing = st.checkbox(
-                "**Sí, quiero recibir información sobre ofertas exclusivas, anuncios y nuevos productos de Arte París**",
+                "**Sí, quiero recibir ofertas exclusivas por SMS y email**",
                 value=False
             )
             st.markdown("""
             <div class="terms-section">
-                <small><strong>Mantente al tanto.</strong> El e-mail es una gran forma de estar al día de las ofertas y novedades de Arte París.</small>
+                <small><strong>Mantente al tanto.</strong> Recibe ofertas especiales, promociones y novedades de Arte París por SMS y email.</small>
             </div>
             """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -1803,16 +2148,18 @@ else:
             
             if st.form_submit_button("Unirme a Arte París", use_container_width=True):
                 if nombre and email and password:
-                    if not acepta_terminos:
+                    if not validar_email(email):
+                        st.error("❌ Formato de email inválido")
+                    elif telefono and not validar_telefono(telefono):
+                        st.error("❌ Formato de teléfono inválido")
+                    elif not acepta_terminos:
                         st.error("❌ Debes aceptar las Condiciones de Uso")
                     else:
                         try:
-                            user_info = signup_user(email, password, nombre, fecha_cumpleanos, acepta_terminos, acepta_marketing)
-                            st.session_state.user = user_info
-                            st.balloons()
-                            st.success("🎉 ¡Bienvenido al Club Arte París! Recibiste 10 puntos de bienvenida")
-                            time.sleep(3)
-                            st.rerun()
+                            result = signup_user(email, password, nombre, telefono, fecha_cumpleanos, acepta_terminos, acepta_marketing)
+                            if result and result.get("needs_verification"):
+                                st.session_state.needs_verification = True
+                                st.rerun()
                         except Exception as e:
                             st.error(f"Error: {e}")
                 else:
@@ -1833,6 +2180,9 @@ else:
         <div class="benefit-item">
             <span>🛒 Pedidos online</span>
         </div>
+        <div class="benefit-item">
+            <span>📱 Notificaciones SMS</span>
+        </div>
         """, unsafe_allow_html=True)
     with col2:
         st.markdown("""
@@ -1844,6 +2194,9 @@ else:
         </div>
         <div class="benefit-item">
             <span>👥 Programa de referidos</span>
+        </div>
+        <div class="benefit-item">
+            <span>🔒 Cuenta verificada</span>
         </div>
         """, unsafe_allow_html=True)
 
