@@ -4,5 +4,4 @@ streamlit
 requests
 streamlit_option_menu
 qrcode
-email.mime.text
-email.mime.multipart
+
